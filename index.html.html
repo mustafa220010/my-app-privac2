@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسب السعرات الذكي</title>
+    <style>
+        /* المتغيرات الأساسية للألوان */
+        :root {
+            --bg-color: #f0f4f8;
+            --screen-bg: #ffffff;
+            --text-color: #2d3748;
+            --btn-text: #ffffff;
+            --border-color: #e2e8f0;
+            --advanced-bg: #f7fafc;
+            --extra-bg: #edf2f7;
+            --section-title: #4a5568;
+            --header-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            --warning-bg: #fffaf0;
+            --warning-text: #c05621;
+            --info-text: #3182ce;
+        }
+
+        /* الوضع الداكن */
+        body.dark-mode {
+            --bg-color: #1a202c;
+            --screen-bg: #2d3748;
+            --text-color: #f7fafc;
+            --border-color: #4a5568;
+            --advanced-bg: #222a38;
+            --extra-bg: #1a202c;
+            --section-title: #e2e8f0;
+            --header-bg: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            --card-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            --warning-bg: #4a2311;
+            --warning-text: #fbd38d;
+            --info-text: #63b3ed;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background-color 0.3s; }
+        
+        /* الترويسة */
+        .app-header { background: var(--header-bg); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .app-header h3 { margin: 0; font-size: 18px; font-weight: bold; flex-grow: 1; text-align: center; }
+        .profile-icon { font-size: 24px; cursor: pointer; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 50%; }
+        .btn-vip-header { background: linear-gradient(135deg, #ecc94b 0%, #d69e2e 100%); color: #744210; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(214, 158, 46, 0.4); margin: 0; width: auto; }
+
+        /* الحاويات والشاشات */
+        .app-container { padding: 20px; }
+        .screen { background: var(--screen-bg); max-width: 450px; margin: 0 auto; padding: 25px; border-radius: 20px; box-shadow: var(--card-shadow); display: none; transition: 0.3s; }
+        .active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* الأزرار */
+        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; color: var(--btn-text); font-weight: bold; transition: transform 0.2s; }
+        button:active { transform: scale(0.98); }
+        .btn-primary { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4); }
+        .btn-back { background-color: #a0aec0; color: #fff; }
+        .btn-calc { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4); }
+        .btn-upload { background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%); }
+        .btn-google { background-color: #dd4b39; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-tips { background-color: #ecc94b; color: #744210; }
+        .btn-policy { background-color: #4a5568; color: white; }
+        .btn-add-extra { background-color: transparent; color: #3182ce; border: 2px dashed #3182ce; padding: 10px; margin-top: 5px; }
+        body.dark-mode .btn-add-extra { color: #63b3ed; border-color: #63b3ed; }
+
+        /* كروت الاشتراكات */
+        .subscription-card { border: 2px solid #ecc94b; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--advanced-bg); transition: 0.3s; }
+        .subscription-card:hover { background: #ecc94b; color: #744210; }
+        .subscription-price { font-size: 18px; font-weight: bold; color: #d69e2e; }
+        .subscription-card:hover .subscription-price { color: #744210; }
+
+        /* المدخلات والنصوص */
+        .image-placeholder { width: 100%; height: 180px; background-color: var(--extra-bg); border: 2px dashed var(--border-color); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; font-size: 45px; }
+        .bottom-banner-ad { background-color: var(--extra-bg); border: 1px solid var(--border-color); color: var(--section-title); text-align: center; padding: 20px; border-radius: 12px; margin-top: 20px; font-size: 14px; font-weight: bold; }
+        .advanced-box, .result-card, .history-card { background: var(--advanced-bg); border: 1px solid var(--border-color); padding: 18px; border-radius: 15px; margin-top: 15px; text-align: right; }
+        #advancedOptions { display: none; }
+        
+        .section-title { font-weight: bold; margin-top: 15px; margin-bottom: 5px; color: var(--section-title); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0 15px 0; border: 1px solid var(--border-color); border-radius: 10px; box-sizing: border-box; background-color: var(--screen-bg); color: var(--text-color); font-size: 15px; outline: none; }
+        input:focus, select:focus { border-color: #4299e1; }
+        .custom-input { display: none; }
+        .checkbox-container { display: flex; align-items: center; margin: 15px 0; font-weight: bold; }
+        .checkbox-container input { width: 20px; height: 20px; margin-left: 10px; margin-right: 10px; cursor: pointer; }
+        
+        /* تنسيق المكونات الإضافية (الجديد) */
+        .extra-item-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background-color: var(--extra-bg); padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border-color); }
+        .extra-item-row select, .extra-item-row input { margin: 0; padding: 8px; font-size: 14px; }
+        .extra-item-row .row-top { display: flex; gap: 8px; width: 100%; }
+        .extra-item-row .row-bottom { display: flex; gap: 8px; width: 100%; align-items: center; }
+        .btn-remove { background-color: #e53e3e; color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; margin: 0; width: auto; flex-shrink: 0; }
+        
+        /* تنسيق نصائح الذكاء الاصطناعي */
+        .tip-card { padding: 12px; border-radius: 10px; margin-bottom: 12px; font-size: 14px; text-align: right; line-height: 1.6; }
+        .reduce-calories { background-color: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+        .increase-veggies { background-color: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }
+        .general-tip { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+        
+        body.dark-mode .reduce-calories { background-color: #4a1313; color: #feb2b2; border-color: #742a2a; }
+        body.dark-mode .increase-veggies { background-color: #1c4532; color: #9ae6b4; border-color: #276749; }
+        body.dark-mode .general-tip { background-color: #1a365d; color: #90cdf4; border-color: #2a4365; }
+
+        .info-note { font-size: 13px; color: var(--info-text); margin-top: -10px; margin-bottom: 10px; display: none; font-weight: bold; }
+        .history-item { border-bottom: 1px solid var(--border-color); padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        .history-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <div class="profile-icon" onclick="switchScreen('profileScreen')">👤</div>
+        <h3>حاسب السعرات</h3>
+        <button id="header-vip-btn" class="btn-vip-header" onclick="switchScreen('subscriptionScreen')">👑 VIP</button>
+    </div>
+
+    <div class="app-container">
+        <!-- الشاشة الرئيسية -->
+        <div id="mainScreen" class="screen active">
+            <button class="btn-primary" onclick="switchScreen('calcScreen')">📸 1. تصوير لحساب السعرات</button>
+            <button class="btn-primary" onclick="switchScreen('historyScreen')">📋 2. سجل الوجبات</button>
+            <button class="btn-primary" onclick="switchScreen('settingsScreen')">⚙️ 3. الإعدادات</button>
+            <button class="btn-primary" onclick="switchScreen('infoScreen')">📖 4. طريقة الاستخدام</button>
+
+            <div id="main-banner-ad" class="bottom-banner-ad">
+                مساحة إعلانية (Google AdMob)
+            </div>
+        </div>
+
+        <!-- شاشة الاشتراكات -->
+        <div id="subscriptionScreen" class="screen">
+            <h2 style="text-align: center; color: #d69e2e;">إزالة الإعلانات (VIP)</h2>
+            <p style="text-align: center; margin-bottom: 20px; font-size: 14px;">استمتع بتجربة خالية من الإعلانات تماماً.</p>
+            
+            <div class="subscription-card" onclick="activatePremium()">
+                <span>لمدة شهر واحد</span>
+                <span class="subscription-price">10 ريال</span>
+            </div>
+            <div class="subscription-card" onclick="activatePremium()">
+                <span>لمدة 6 أشهر</span>
+                <span class="subscription-price">45 ريال</span>
+            </div>
+            <div class="subscription-card" onclick="activatePremium()">
+                <span>لمدة سنة كاملة</span>
+                <span class="subscription-price">80 ريال</span>
+            </div>
+
+            <div class="advanced-box" style="margin-top: 25px; text-align: center; background: transparent; border-color: transparent;">
+                <button class="btn-upload" onclick="activatePremium(true)" style="background: #4a5568;">🔄 استعادة المشتريات</button>
+            </div>
+            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
+        </div>
+
+        <!-- شاشة الحساب الشخصي -->
+        <div id="profileScreen" class="screen">
+            <h2 style="text-align: center;">الحساب الشخصي</h2>
+            <div id="loginSection">
+                <button class="btn-google" onclick="simulateLogin()"><span style="font-size: 20px;">G</span> اتصال بحساب Google</button>
+            </div>
+            <div id="userDataSection" style="display:none;" class="advanced-box">
+                <div class="section-title">بياناتك الشخصية:</div>
+                <input type="text" placeholder="الاسم">
+                <input type="number" placeholder="العمر">
+                <input type="number" placeholder="الوزن (كجم)">
+                <button class="btn-calc" onclick="alert('تم حفظ البيانات بنجاح!')">حفظ البيانات</button>
+            </div>
+            <button class="btn-tips" id="btn-profile-vip" onclick="switchScreen('subscriptionScreen')" style="margin-top: 15px;">👑 إدارة الاشتراكات</button>
+            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
+        </div>
+
+        <!-- شاشة سجل الوجبات -->
+        <div id="historyScreen" class="screen">
+            <h2 style="text-align: center;">سجل الوجبات</h2>
+            <div class="history-card">
+                <div class="history-item"><span>دجاج ورز (أمس)</span><strong style="color: #48bb78;">450 Kcal</strong></div>
+            </div>
+            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
+        </div>
+
+        <!-- شاشة الحساب والتصوير -->
+        <div id="calcScreen" class="screen">
+            <h2 style="text-align: center;">تحليل الوجبة</h2>
+            <div class="image-placeholder">📸</div>
+            <button class="btn-upload">التقط صورة</button>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="advancedToggle" onchange="toggleAdvanced()">
+                <label for="advancedToggle">خيارات متقدمة (لزيادة الدقة)</label>
+            </div>
+
+            <!-- الخيارات المتقدمة -->
+            <div id="advancedOptions" class="advanced-box">
+                
+                <div class="section-title">طريقة الطبخ:</div>
+                <select id="cookingMethod">
+                    <option value="none">-- اختر طريقة الطبخ --</option>
+                    <option value="grilled">مشوي (أقل سعرات)</option>
+                    <option value="boiled">مسلوق (صحي)</option>
+                    <option value="fried">مقلي (عالي السعرات)</option>
+                </select>
+
+                <div class="section-title">مكون اللحوم / البروتين:</div>
+                <select id="proteinType" onchange="checkNutritionFact()">
+                    <option value="none">-- اختر النوع --</option>
+                    <option value="beef">لحم بقر / غنم</option>
+                    <option value="chicken">دجاج</option>
+                    <option value="fish">سمك</option>
+                    <option value="lentils">عدس / بقوليات</option>
+                    <option value="custom">أخرى</option>
+                </select>
+                <div id="nutrition-tip" class="info-note">💡 العدس يحتوي أيضاً على كربوهيدرات.</div>
+                <input type="text" id="proteinCustom" class="custom-input" placeholder="اكتب نوع البروتين...">
+                <input type="number" id="proteinWeight" placeholder="الوزن (بالجرام) اختياري">
+
+                <!-- القسم الجديد: إضافة المكونات الإضافية -->
+                <div class="section-title" style="margin-top: 25px;">مكونات إضافية في الطبق:</div>
+                <div id="dynamicIngredientsContainer">
+                    <!-- سيتم إضافة المكونات هنا ديناميكياً -->
+                </div>
+                
+                <button class="btn-add-extra" type="button" onclick="addIngredientRow()">+ أضف مكون آخر (خضار، سوائل، إلخ)</button>
+                
+            </div>
+
+            <button class="btn-calc" onclick="startCalculation()">احسب السعرات الآن</button>
+            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
+        </div>
+
+        <!-- شاشة الانتظار والإعلان -->
+        <div id="adScreen" class="screen" style="text-align: center;">
+            <h2 id="title-ad">إعلان ممول</h2>
+            <div style="height: 200px; background-color: var(--extra-bg); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                <p id="text-ad-placeholder">مساحة إعلانية...<br>النتيجة بعد قليل</p>
+            </div>
+        </div>
+
+        <!-- شاشة النتيجة -->
+        <div id="resultScreen" class="screen" style="text-align: center;">
+            <h2 style="text-align: center;">النتيجة التقريبية</h2>
+            
+            <div class="advanced-box" style="text-align: center; border-color: #48bb78; border-width: 2px;">
+                <h1 id="finalCalories" style="color: #48bb78; margin: 0; font-size: 50px;">0</h1>
+                <p style="margin-top: 5px; font-weight: bold;">سعرة حرارية (Kcal)</p>
+            </div>
+
+            <!-- حاوية نصائح الذكاء الاصطناعي -->
+            <div id="aiTipsContainer" style="text-align: right; margin-top: 20px; display: none;">
+                <div class="section-title" style="border: none; color: #2d3748;">💡 نصائح الذكاء الاصطناعي:</div>
+                
+                <div class="tip-card reduce-calories">
+                    <strong>📉 لتقليل السعرات:</strong> <span id="tipReduce"></span>
+                </div>
+                
+                <div class="tip-card increase-veggies">
+                    <strong>🥗 لزيادة القيمة الغذائية:</strong> <span id="tipVeggies"></span>
+                </div>
+                
+                <div class="tip-card general-tip">
+                    <strong>✨ نصيحة الشيف:</strong> <span id="tipGeneral"></span>
+                </div>
+            </div>
+
+            <button class="btn-back" style="margin-top: 20px;" onclick="switchScreen('mainScreen')">رجوع للرئيسية</button>
+        </div>
+
+        <!-- شاشة الإعدادات -->
+        <div id="settingsScreen" class="screen">
+            <h2 style="text-align: center;">الإعدادات</h2>
+            <div class="advanced-box">
+                <label class="section-title" style="border:none; margin:0;">المظهر:</label>
+                <select id="themeSelector" onchange="changeTheme()">
+                    <option value="system">تلقائي</option>
+                    <option value="light">فاتح</option>
+                    <option value="dark">داكن</option>
+                </select>
+            </div>
+            <button class="btn-policy" onclick="openPrivacyPolicy()">📄 سياسة الخصوصية</button>
+            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
+        </div>
+
+        <!-- شاشة طريقة الاستخدام -->
+        <div id="infoScreen" class="screen">
+            <h2 style="text-align: center;">طريقة الاستخدام</h2>
+            <div class="advanced-box" style="text-align: right; line-height: 1.8;">
+                <p>1. التقط صورة واضحة للوجبة وسيقوم التطبيق بتقدير السعرات آلياً.</p>
+                <p>2. للحصول على حسبة أدق، استخدم (الخيارات المتقدمة) وحدد طريقة الطبخ والوزن التقريبي للبروتين والمكونات الأخرى.</p>
+                <p>3. اقرأ نصائح الذكاء الاصطناعي بعد كل وجبة لتحسين نظامك الغذائي.</p>
+            </div>
+            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
+        </div>
+    </div>
+
+    <script>
+        let isPremium = false;
+        let ingredientCount = 0; // عداد المكونات الإضافية
+
+        // دوال التنقل الأساسية
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function simulateLogin() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('userDataSection').style.display = 'block';
+        }
+
+        function activatePremium(isRestore = false) {
+            isPremium = true;
+            alert(isRestore ? 'تمت استعادة المشتريات بنجاح. تم إيقاف الإعلانات.' : 'تم الاشتراك بنجاح! شكراً لك.');
+            document.getElementById('main-banner-ad').style.display = 'none';
+            document.getElementById('header-vip-btn').style.display = 'none';
+            document.getElementById('btn-profile-vip').style.display = 'none';
+            switchScreen('mainScreen');
+        }
+
+        // الخيارات المتقدمة
+        function toggleAdvanced() {
+            document.getElementById('advancedOptions').style.display = document.getElementById('advancedToggle').checked ? 'block' : 'none';
+        }
+
+        function checkNutritionFact() {
+            const select = document.getElementById('proteinType');
+            document.getElementById('proteinCustom').style.display = select.value === 'custom' ? 'block' : 'none';
+            document.getElementById('nutrition-tip').style.display = select.value === 'lentils' ? 'block' : 'none';
+        }
+
+        // =====================================================================
+        // 🆕 دوال إدارة المكونات الإضافية (خضار، سوائل، أخرى)
+        // =====================================================================
+        
+        function addIngredientRow() {
+            ingredientCount++;
+            const container = document.getElementById('dynamicIngredientsContainer');
+            
+            // إنشاء الـ HTML الخاص بالصف الجديد
+            const rowHtml = `
+                <div class="extra-item-row" id="ingredient_row_${ingredientCount}">
+                    <div class="row-top">
+                        <select id="ing_type_${ingredientCount}" style="flex: 1;" onchange="updateIngredientUnit(${ingredientCount})">
+                            <option value="veg">🥦 خضروات (جرام)</option>
+                            <option value="liquid">🥛 سوائل (مل)</option>
+                            <option value="other">⚙️ أخرى (مكون حر)</option>
+                        </select>
+                        <input type="text" id="ing_name_${ingredientCount}" placeholder="اسم المكون (مثال: طماطم، كريمة...)" style="flex: 2;">
+                    </div>
+                    <div class="row-bottom">
+                        <input type="number" id="ing_qty_${ingredientCount}" placeholder="الكمية" style="flex: 2;">
+                        <select id="ing_unit_${ingredientCount}" style="flex: 1; background-color: #edf2f7;" disabled>
+                            <option value="g">جرام</option>
+                            <option value="ml">مل</option>
+                        </select>
+                        <button class="btn-remove" type="button" onclick="removeIngredientRow(${ingredientCount})">❌</button>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', rowHtml);
+            
+            // تشغيل التحديث لضبط الوحدة الافتراضية
+            updateIngredientUnit(ingredientCount);
+        }
+
+        function updateIngredientUnit(id) {
+            const typeSelect = document.getElementById(`ing_type_${id}`);
+            const unitSelect = document.getElementById(`ing_unit_${id}`);
+            
+            if (typeSelect.value === 'veg') {
+                unitSelect.value = 'g';
+                unitSelect.disabled = true; // الخضار دائماً بالجرام
+                unitSelect.style.backgroundColor = '#edf2f7';
+            } else if (typeSelect.value === 'liquid') {
+                unitSelect.value = 'ml';
+                unitSelect.disabled = true; // السوائل دائماً بالملي
+                unitSelect.style.backgroundColor = '#edf2f7';
+            } else if (typeSelect.value === 'other') {
+                unitSelect.disabled = false; // يتيح للمستخدم الاختيار
+                unitSelect.style.backgroundColor = '#ffffff';
+            }
+        }
+
+        function removeIngredientRow(id) {
+            const row = document.getElementById(`ingredient_row_${id}`);
+            if (row) row.remove();
+        }
+
+        // =====================================================================
+
+        // دالة الحساب واستدعاء الذكاء الاصطناعي
+        async function startCalculation() {
+            if (isPremium) {
+                document.getElementById('title-ad').style.display = 'none';
+                document.getElementById('text-ad-placeholder').innerHTML = 'جاري تحليل الصورة والبيانات المدخلة...<br>الرجاء الانتظار';
+            } else {
+                document.getElementById('title-ad').style.display = 'block';
+                document.getElementById('text-ad-placeholder').innerHTML = 'مساحة إعلانية...<br>النتيجة بعد قليل';
+            }
+            
+            switchScreen('adScreen');
+            
+            // محاكاة تأخير جلب البيانات من الذكاء الاصطناعي (2.5 ثانية)
+            setTimeout(() => { 
+                const calculatedCalories = 540; 
+                const reduceTip = "استبدل الزيت العادي بمسحة خفيفة من زيت الزيتون، أو استخدم المقلاة الهوائية (القلاية الهوائية) لتقليل نسبة الدهون بمقدار 120 سعرة.";
+                const veggiesTip = "الطبق يفتقر للألياف! أضف طبقاً جانبياً من السلطة الخضراء (خيار، طماطم، خس) مع عصرة ليمون لتسريع الشبع وتسهيل الهضم.";
+                const generalTip = "إذا استبدلت الرز الأبيض بنصف كمية من الرز البني أو الكينوا، ستحصل على طاقة تدوم لفترة أطول دون رفع سكر الدم بشكل مفاجئ.";
+
+                document.getElementById('finalCalories').innerText = calculatedCalories;
+                document.getElementById('tipReduce').innerText = reduceTip;
+                document.getElementById('tipVeggies').innerText = veggiesTip;
+                document.getElementById('tipGeneral').innerText = generalTip;
+                document.getElementById('aiTipsContainer').style.display = 'block';
+
+                switchScreen('resultScreen'); 
+            }, 2500);
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') document.body.classList.add('dark-mode');
+            else if (theme === 'light') document.body.classList.remove('dark-mode');
+            else {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('dark-mode');
+                else document.body.classList.remove('dark-mode');
+            }
+        }
+        function changeTheme() { applyTheme(document.getElementById('themeSelector').value); }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(document.getElementById('themeSelector').value));
+        applyTheme('system');
+
+        function openPrivacyPolicy() {
+            const privacyUrl = 'https://yourname.github.io/my-app-privacy/'; 
+            window.open(privacyUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
