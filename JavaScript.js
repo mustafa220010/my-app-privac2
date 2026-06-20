@@ -1,17 +1,22 @@
-// --- المتغيرات العامة ---
+// ==========================================
+// 1. المتغيرات العامة
+// ==========================================
 let currentLang = 'ar';
-let userTheme = 'system';
-let extraCount = 0;
-let isPremium = false; // حالة الاشتراك (VIP)
+let isPremium = false; // حالة الاشتراك VIP
+let ingredientCount = 0; // عداد المكونات الإضافية
 
-// --- وظائف التنقل الأساسية ---
+// ==========================================
+// 2. وظائف التنقل الأساسية
+// ==========================================
 function switchScreen(screenId) {
+    // إخفاء جميع الشاشات
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    // إظهار الشاشة المطلوبة
     const targetScreen = document.getElementById(screenId);
     if(targetScreen) targetScreen.classList.add('active');
 }
 
-// --- محاكاة تسجيل الدخول ---
+// محاكاة تسجيل الدخول
 function simulateLogin() {
     const loginSec = document.getElementById('loginSection');
     const userSec = document.getElementById('userDataSection');
@@ -19,30 +24,33 @@ function simulateLogin() {
     if(userSec) userSec.style.display = 'block';
 }
 
-// --- نظام الاشتراكات (إخفاء الإعلانات) ---
+// ==========================================
+// 3. نظام الاشتراكات (VIP) وإخفاء الإعلانات
+// ==========================================
 function activatePremium(isRestore = false) {
-    isPremium = true;
+    isPremium = true; // تفعيل حالة المشترك
     
+    // رسالة التأكيد
     if(isRestore) {
-        alert(currentLang === 'en' ? 'Purchases restored successfully. Ads disabled.' : 'تمت استعادة المشتريات والاشتراك بنجاح. تم إيقاف الإعلانات.');
+        alert('تمت استعادة المشتريات والاشتراك بنجاح. تم إيقاف الإعلانات.');
     } else {
-        alert(currentLang === 'en' ? 'Subscription Successful! Thank you.' : 'تم الاشتراك بنجاح! شكراً لك.');
+        alert('تم الاشتراك بنجاح! شكراً لك.');
     }
 
-    // إخفاء بنر الإعلان السفلي برمجياً للمشتركين
-    const mainBanner = document.getElementById('main-banner-ad');
-    if (mainBanner) mainBanner.style.display = 'none';
+    // إخفاء بنر الإعلانات وأزرار VIP من كل مكان في التطبيق
+    const elementsToHide = ['main-banner-ad', 'header-vip-btn', 'btn-profile-vip'];
+    elementsToHide.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.style.display = 'none';
+    });
     
-    const headerVip = document.getElementById('header-vip-btn');
-    if (headerVip) headerVip.style.display = 'none';
-    
-    const profileVip = document.getElementById('btn-profile-vip');
-    if (profileVip) profileVip.style.display = 'none';
-    
+    // الرجوع للشاشة الرئيسية
     switchScreen('mainScreen');
 }
 
-// --- وظائف الخيارات المتقدمة ---
+// ==========================================
+// 4. الخيارات المتقدمة والمكونات
+// ==========================================
 function toggleAdvanced() {
     const advancedOptions = document.getElementById('advancedOptions');
     const advancedToggle = document.getElementById('advancedToggle');
@@ -60,82 +68,99 @@ function checkNutritionFact() {
     if(select && tip) tip.style.display = select.value === 'lentils' ? 'block' : 'none';
 }
 
+// دالة إضافة الخضار/السوائل/أخرى
 function addIngredientRow() {
-    extraCount++;
+    ingredientCount++;
     const container = document.getElementById('dynamicIngredientsContainer');
-    if(!container) return;
+    if(!container) return; // حماية من الأخطاء
 
+    // كود HTML للصف الجديد
     const rowHtml = `
-        <div class="extra-item-row" id="ingredient_row_${extraCount}" style="display: flex; gap: 8px; margin-top: 10px; background: var(--extra-bg); padding: 10px; border-radius: 10px;">
-            <select style="flex: 1;">
-                <option value="veg">خضروات</option>
-                <option value="liquid">سوائل</option>
-                <option value="other">أخرى</option>
-            </select>
-            <input type="text" placeholder="اسم المكون" style="flex: 2; margin:0;">
-            <input type="number" placeholder="الكمية" style="flex: 1; margin:0;">
-            <button type="button" onclick="document.getElementById('ingredient_row_${extraCount}').remove()" style="background:#e53e3e; color:white; padding:8px; border:none; border-radius:8px; cursor:pointer;">❌</button>
+        <div class="extra-item-row" id="ingredient_row_${ingredientCount}" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--extra-bg); padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border-color);">
+            <div style="display: flex; gap: 8px; width: 100%;">
+                <select id="ing_type_${ingredientCount}" style="flex: 1; margin:0;" onchange="updateIngredientUnit(${ingredientCount})">
+                    <option value="veg">🥦 خضروات</option>
+                    <option value="liquid">🥛 سوائل</option>
+                    <option value="other">⚙️ أخرى</option>
+                </select>
+                <input type="text" placeholder="اسم المكون (مثال: طماطم...)" style="flex: 2; margin:0;">
+            </div>
+            <div style="display: flex; gap: 8px; width: 100%; align-items: center;">
+                <input type="number" placeholder="الكمية" style="flex: 2; margin:0;">
+                <select id="ing_unit_${ingredientCount}" style="flex: 1; margin:0; background-color: #edf2f7;" disabled>
+                    <option value="g">جرام</option>
+                    <option value="ml">مل</option>
+                </select>
+                <button type="button" onclick="document.getElementById('ingredient_row_${ingredientCount}').remove()" style="background:#e53e3e; color:white; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; margin:0;">❌</button>
+            </div>
         </div>
     `;
     container.insertAdjacentHTML('beforeend', rowHtml);
+    updateIngredientUnit(ingredientCount); // تفعيل التحديث المباشر للوحدة
 }
 
-// =====================================================================
-// 🚀 منطقة الحساب ودمج إعلانات AdMob
-// =====================================================================
-
-async function startCalculation() {
-    // التحقق من حالة الاشتراك لتحديد عرض الإعلان أو تجاوزه
-    if (isPremium) {
-        // العميل VIP: لا إعلانات، نظهر شاشة المعالجة فقط
-        if(document.getElementById('title-ad')) document.getElementById('title-ad').style.display = 'none';
-        if(document.getElementById('text-ad-placeholder')) document.getElementById('text-ad-placeholder').innerHTML = 'جاري تحليل الصورة بالذكاء الاصطناعي...<br>الرجاء الانتظار';
-        switchScreen('adScreen');
+// دالة تثبيت الوحدات (الجرام للخضار والمل للسوائل)
+function updateIngredientUnit(id) {
+    const typeSelect = document.getElementById(`ing_type_${id}`);
+    const unitSelect = document.getElementById(`ing_unit_${id}`);
+    if(!typeSelect || !unitSelect) return;
+    
+    if (typeSelect.value === 'veg') {
+        unitSelect.value = 'g';
+        unitSelect.disabled = true;
+        unitSelect.style.backgroundColor = '#edf2f7';
+    } else if (typeSelect.value === 'liquid') {
+        unitSelect.value = 'ml';
+        unitSelect.disabled = true;
+        unitSelect.style.backgroundColor = '#edf2f7';
     } else {
-        // العميل العادي: نظهر شاشة الانتظار ونستدعي الإعلان البيني
+        unitSelect.disabled = false;
+        unitSelect.style.backgroundColor = '#ffffff';
+    }
+}
+
+// ==========================================
+// 5. حساب السعرات والذكاء الاصطناعي
+// ==========================================
+async function startCalculation() {
+    // 1. التحقق من الإعلانات
+    if (isPremium) {
+        if(document.getElementById('title-ad')) document.getElementById('title-ad').style.display = 'none';
+        if(document.getElementById('text-ad-placeholder')) document.getElementById('text-ad-placeholder').innerHTML = 'جاري تحليل الصورة والبيانات...<br>الرجاء الانتظار';
+    } else {
         if(document.getElementById('title-ad')) document.getElementById('title-ad').style.display = 'block';
         if(document.getElementById('text-ad-placeholder')) document.getElementById('text-ad-placeholder').innerHTML = 'مساحة إعلانية...<br>النتيجة بعد قليل';
-        switchScreen('adScreen');
         
-        // 🚨 كود تشغيل إعلان AdMob (عبر Webintoapp) 🚨
-        // إذا كان موقع Webintoapp يوفر كود JS لتشغيل الإعلان، ضعه هنا. 
-        // مثال شائع:
-        try {
-            if (typeof showInterstitialAd === "function") {
-                showInterstitialAd(); 
-            }
-        } catch(e) {
-            console.log("لم يتم تشغيل الإعلان لأن التطبيق مفتوح في متصفح الكمبيوتر وليس الهاتف.");
-        }
+        // استدعاء إعلان AdMob البيني هنا إذا توفر
+        try { if (typeof showInterstitialAd === "function") showInterstitialAd(); } catch(e) {}
     }
+    
+    // الانتقال لشاشة الانتظار
+    switchScreen('adScreen');
 
+    // 2. محاكاة الرد من الذكاء الاصطناعي
     try {
-        // محاكاة تأخير الرد من الذكاء الاصطناعي (3 ثوانٍ)
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 3000)); // انتظار 3 ثوانٍ
         
-        // النتيجة الوهمية (تستبدل لاحقاً ببيانات الـ API)
-        const calculatedCalories = 540; 
-        const reduceTip = "استبدل الزيت العادي بمسحة خفيفة من زيت الزيتون لتقليل السعرات.";
-        const veggiesTip = "أضف طبقاً جانبياً من السلطة الخضراء لتسريع الشبع.";
-        const generalTip = "استبدال الرز الأبيض بالبني يعطي طاقة تدوم أطول.";
-
-        // وضع البيانات في الشاشة
-        if(document.getElementById('finalCalories')) document.getElementById('finalCalories').innerText = calculatedCalories;
-        if(document.getElementById('tipReduce')) document.getElementById('tipReduce').innerText = reduceTip;
-        if(document.getElementById('tipVeggies')) document.getElementById('tipVeggies').innerText = veggiesTip;
-        if(document.getElementById('tipGeneral')) document.getElementById('tipGeneral').innerText = generalTip;
+        // النتيجة والنصائح
+        if(document.getElementById('finalCalories')) document.getElementById('finalCalories').innerText = 540;
+        if(document.getElementById('tipReduce')) document.getElementById('tipReduce').innerText = "استبدل الزيت العادي بمسحة خفيفة من زيت الزيتون، أو استخدم المقلاة الهوائية لتقليل السعرات.";
+        if(document.getElementById('tipVeggies')) document.getElementById('tipVeggies').innerText = "الطبق يفتقر للألياف! أضف طبقاً جانبياً من السلطة الخضراء لتسريع الشبع.";
+        if(document.getElementById('tipGeneral')) document.getElementById('tipGeneral').innerText = "استبدال الرز الأبيض بالرز البني يعطي طاقة تدوم أطول دون رفع سكر الدم.";
+        
         if(document.getElementById('aiTipsContainer')) document.getElementById('aiTipsContainer').style.display = 'block';
 
-        // الانتقال لشاشة النتيجة
-        switchScreen('resultScreen');
-
+        // الانتقال للنتيجة
+        switchScreen('resultScreen'); 
     } catch (error) {
         alert('حدث خطأ أثناء التحليل. حاول مرة أخرى.');
-        switchScreen('calcScreen'); 
+        switchScreen('calcScreen');
     }
 }
 
-// --- نظام المظهر ---
+// ==========================================
+// 6. نظام المظهر (داكن / فاتح)
+// ==========================================
 function applyTheme(theme) {
     if (theme === 'dark') document.body.classList.add('dark-mode');
     else if (theme === 'light') document.body.classList.remove('dark-mode');
@@ -154,8 +179,9 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
 });
 applyTheme('system');
 
-// --- سياسة الخصوصية ---
+// ==========================================
+// 7. سياسة الخصوصية
+// ==========================================
 function openPrivacyPolicy() {
-    const privacyUrl = 'https://mustafa220010.github.io/my-app-privacy/'; 
-    window.open(privacyUrl, '_blank');
+    window.open('https://mustafa220010.github.io/my-app-privacy/', '_blank');
 }
