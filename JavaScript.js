@@ -2,7 +2,7 @@
 let currentLang = 'ar';
 let userTheme = 'system';
 let extraCount = 0;
-let isPremium = false; 
+let isPremium = false; // حالة الاشتراك (VIP)
 
 // --- وظائف التنقل الأساسية ---
 function switchScreen(screenId) {
@@ -19,7 +19,7 @@ function simulateLogin() {
     if(userSec) userSec.style.display = 'block';
 }
 
-// --- نظام الاشتراكات ---
+// --- نظام الاشتراكات (إخفاء الإعلانات) ---
 function activatePremium(isRestore = false) {
     isPremium = true;
     
@@ -29,6 +29,7 @@ function activatePremium(isRestore = false) {
         alert(currentLang === 'en' ? 'Subscription Successful! Thank you.' : 'تم الاشتراك بنجاح! شكراً لك.');
     }
 
+    // إخفاء بنر الإعلان السفلي برمجياً للمشتركين
     const mainBanner = document.getElementById('main-banner-ad');
     if (mainBanner) mainBanner.style.display = 'none';
     
@@ -59,71 +60,77 @@ function checkNutritionFact() {
     if(select && tip) tip.style.display = select.value === 'lentils' ? 'block' : 'none';
 }
 
-function checkCustom(type) {
-    const select = document.getElementById(type + 'Type');
-    const customInput = document.getElementById(type + 'Custom');
-    if(select && customInput) customInput.style.display = select.value === 'custom' ? 'block' : 'none';
-}
-
-function addExtraItem() {
+function addIngredientRow() {
     extraCount++;
-    const container = document.getElementById('dynamicExtrasContainer');
-    if(!container) return; // حماية من الخطأ إذا لم يكن العنصر موجوداً
+    const container = document.getElementById('dynamicIngredientsContainer');
+    if(!container) return;
 
-    const isEn = (currentLang === 'en');
-    const placeholderName = isEn ? 'e.g. Tabasco Sauce' : 'مثال: صوص تباسكو';
-    const placeholderAmount = isEn ? 'Amount' : 'الكمية';
-    
-    const itemHtml = `
-        <div class="extra-item" id="extraItem_${extraCount}" style="display: flex; gap: 10px; margin-top: 10px; align-items: center;">
-            <input type="text" id="extraName_${extraCount}" placeholder="${placeholderName}" style="flex: 2; margin:0;">
-            <input type="number" id="extraAmount_${extraCount}" placeholder="${placeholderAmount}" style="flex: 1; margin:0;">
-            <select id="extraUnit_${extraCount}" style="flex: 1; margin:0;">
-                <option value="g">${isEn ? 'g' : 'جرام'}</option>
-                <option value="ml">${isEn ? 'ml' : 'مل'}</option>
+    const rowHtml = `
+        <div class="extra-item-row" id="ingredient_row_${extraCount}" style="display: flex; gap: 8px; margin-top: 10px; background: var(--extra-bg); padding: 10px; border-radius: 10px;">
+            <select style="flex: 1;">
+                <option value="veg">خضروات</option>
+                <option value="liquid">سوائل</option>
+                <option value="other">أخرى</option>
             </select>
-            <button onclick="document.getElementById('extraItem_${extraCount}').remove()" style="background:#e53e3e; color:white; padding:10px; border:none; border-radius:5px; cursor:pointer;">×</button>
+            <input type="text" placeholder="اسم المكون" style="flex: 2; margin:0;">
+            <input type="number" placeholder="الكمية" style="flex: 1; margin:0;">
+            <button type="button" onclick="document.getElementById('ingredient_row_${extraCount}').remove()" style="background:#e53e3e; color:white; padding:8px; border:none; border-radius:8px; cursor:pointer;">❌</button>
         </div>
     `;
-    container.insertAdjacentHTML('beforeend', itemHtml);
+    container.insertAdjacentHTML('beforeend', rowHtml);
 }
 
-// --- منطقة الحساب والذكاء الاصطناعي ---
+// =====================================================================
+// 🚀 منطقة الحساب ودمج إعلانات AdMob
+// =====================================================================
+
 async function startCalculation() {
-    const advancedToggle = document.getElementById('advancedToggle');
-    const isAdvanced = advancedToggle ? advancedToggle.checked : false;
-    
+    // التحقق من حالة الاشتراك لتحديد عرض الإعلان أو تجاوزه
     if (isPremium) {
+        // العميل VIP: لا إعلانات، نظهر شاشة المعالجة فقط
         if(document.getElementById('title-ad')) document.getElementById('title-ad').style.display = 'none';
-        if(document.getElementById('text-ad-placeholder')) document.getElementById('text-ad-placeholder').innerHTML = currentLang === 'en' ? 'Analyzing via AI...<br>Please wait' : 'جاري تحليل الصورة بالذكاء الاصطناعي...<br>الرجاء الانتظار';
+        if(document.getElementById('text-ad-placeholder')) document.getElementById('text-ad-placeholder').innerHTML = 'جاري تحليل الصورة بالذكاء الاصطناعي...<br>الرجاء الانتظار';
         switchScreen('adScreen');
     } else {
+        // العميل العادي: نظهر شاشة الانتظار ونستدعي الإعلان البيني
         if(document.getElementById('title-ad')) document.getElementById('title-ad').style.display = 'block';
-        if(document.getElementById('text-ad-placeholder')) document.getElementById('text-ad-placeholder').innerHTML = currentLang === 'en' ? 'Ad Space...<br>Result shortly' : 'مساحة إعلانية...<br>النتيجة بعد قليل';
+        if(document.getElementById('text-ad-placeholder')) document.getElementById('text-ad-placeholder').innerHTML = 'مساحة إعلانية...<br>النتيجة بعد قليل';
         switchScreen('adScreen');
+        
+        // 🚨 كود تشغيل إعلان AdMob (عبر Webintoapp) 🚨
+        // إذا كان موقع Webintoapp يوفر كود JS لتشغيل الإعلان، ضعه هنا. 
+        // مثال شائع:
+        try {
+            if (typeof showInterstitialAd === "function") {
+                showInterstitialAd(); 
+            }
+        } catch(e) {
+            console.log("لم يتم تشغيل الإعلان لأن التطبيق مفتوح في متصفح الكمبيوتر وليس الهاتف.");
+        }
     }
 
     try {
-        // محاكاة تأخير الرد
+        // محاكاة تأخير الرد من الذكاء الاصطناعي (3 ثوانٍ)
         await new Promise(resolve => setTimeout(resolve, 3000));
         
-        const calculatedCalories = 520; 
-        const aiTips = currentLang === 'en' ? "Try replacing white rice with brown rice." : "جرب استبدال الرز الأبيض بالرز البني لزيادة الألياف وتقليل امتصاص السكر.";
+        // النتيجة الوهمية (تستبدل لاحقاً ببيانات الـ API)
+        const calculatedCalories = 540; 
+        const reduceTip = "استبدل الزيت العادي بمسحة خفيفة من زيت الزيتون لتقليل السعرات.";
+        const veggiesTip = "أضف طبقاً جانبياً من السلطة الخضراء لتسريع الشبع.";
+        const generalTip = "استبدال الرز الأبيض بالبني يعطي طاقة تدوم أطول.";
 
-        // حماية عند عرض النتيجة
-        const resultH1 = document.querySelector('#resultScreen h1');
-        const tipsContent = document.getElementById('text-tips-content');
-        const tipsBox = document.getElementById('aiTipsBox');
+        // وضع البيانات في الشاشة
+        if(document.getElementById('finalCalories')) document.getElementById('finalCalories').innerText = calculatedCalories;
+        if(document.getElementById('tipReduce')) document.getElementById('tipReduce').innerText = reduceTip;
+        if(document.getElementById('tipVeggies')) document.getElementById('tipVeggies').innerText = veggiesTip;
+        if(document.getElementById('tipGeneral')) document.getElementById('tipGeneral').innerText = generalTip;
+        if(document.getElementById('aiTipsContainer')) document.getElementById('aiTipsContainer').style.display = 'block';
 
-        if(resultH1) resultH1.innerText = calculatedCalories;
-        if(tipsContent) tipsContent.innerText = aiTips;
-        if(tipsBox) tipsBox.style.display = 'block'; // تعديل: إظهار النصائح بدلاً من إخفائها
-
+        // الانتقال لشاشة النتيجة
         switchScreen('resultScreen');
 
     } catch (error) {
-        console.error("خطأ في تحليل الذكاء الاصطناعي:", error);
-        alert(currentLang === 'en' ? 'Error analyzing image. Try again.' : 'حدث خطأ أثناء تحليل الصورة. حاول مرة أخرى.');
+        alert('حدث خطأ أثناء التحليل. حاول مرة أخرى.');
         switchScreen('calcScreen'); 
     }
 }
@@ -147,12 +154,8 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
 });
 applyTheme('system');
 
-// --- نظام تغيير اللغة المصحح ---
-function changeLanguage() {
-    currentLang = currentLang === 'ar' ? 'en' : 'ar';
-    document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = currentLang;
-    
-    alert(currentLang === 'ar' ? 'تم تغيير اللغة إلى العربية' : 'Language changed to English');
-    // هنا يجب إضافة كود تغيير النصوص في واجهة المستخدم (HTML) حسب اللغة المحددة
+// --- سياسة الخصوصية ---
+function openPrivacyPolicy() {
+    const privacyUrl = 'https://mustafa220010.github.io/my-app-privacy/'; 
+    window.open(privacyUrl, '_blank');
 }
