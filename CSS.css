@@ -1,0 +1,133 @@
+/* الألوان الأساسية */
+:root {
+    --bg-color: #f7fafc;
+    --card-bg: #ffffff;
+    --primary-color: #3182ce;
+    --secondary-color: #4299e1;
+    --text-color: #2d3748;
+    --border-color: #e2e8f0;
+    --border-focus: #3182ce;
+    --extra-bg: #edf2f7;
+    --danger-color: #e53e3e;
+    --success-color: #48bb78;
+}
+
+/* الألوان الداكنة */
+body.dark-mode {
+    --bg-color: #1a202c;
+    --card-bg: #2d3748;
+    --primary-color: #63b3ed;
+    --secondary-color: #4299e1;
+    --text-color: #e2e8f0;
+    --border-color: #4a5568;
+    --border-focus: #63b3ed;
+    --extra-bg: #1a202c;
+}
+
+/* الإعدادات العامة */
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    direction: rtl;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* الشاشات */
+.screen {
+    display: none;
+    padding: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+    animation: fadeIn 0.4s ease-in-out;
+}
+.screen.active { display: block; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* البطاقات */
+.card {
+    background-color: var(--card-bg);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+/* المدخلات */
+input[type="text"], input[type="number"], select {
+    width: 100%;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+input:focus, select:focus {
+    border-color: var(--border-focus);
+    outline: none;
+}
+
+/* الأزرار */
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s, transform 0.1s;
+}
+button:active { transform: scale(0.98); }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* زر الكاميرا */
+.upload-btn {
+    display: block;
+    background-color: var(--secondary-color);
+    color: white;
+    text-align: center;
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    transition: 0.3s;
+}
+.upload-btn:hover { background-color: var(--primary-color); }
+
+/* إعلانات البانر */
+.ad-banner {
+    width: 100%;
+    height: 60px;
+    background: #e2e8f0;
+    text-align: center;
+    line-height: 60px;
+    margin-top: 15px;
+    border-radius: 8px;
+    color: #718096;
+    font-weight: bold;
+    border: 1px dashed #a0aec0;
+}
+body.dark-mode .ad-banner {
+    background: #4a5568;
+    color: #a0aec0;
+    border-color: #718096;
+}
