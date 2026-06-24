@@ -12,7 +12,7 @@ google-generativeai
 pillow
 gunicorn
 
-app = Flask(__loqaymat mahsooba__)
+app = Flask(__name__)
 CORS(app) # تفعيل السيرفر لاستقبال الطلبات من الواجهة الخارجية
 
 # سحب مفتاح الـ API بشكل آمن من إعدادات البيئة في Render لحماية حسابك
