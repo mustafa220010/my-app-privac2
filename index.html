@@ -505,7 +505,7 @@
 
             try {
                 // استبدل هذا الرابط برابط خدمة Render الخاصة بك عند الإطلاق للإنتاج المباشر
-                const response = await fetch('http://127.0.0.1:5000/analyze', { method: 'POST', body: formData });
+const response = await fetch('https://my-app-privac2.onrender.com/analyze', { method: 'POST', body: formData });
                 if (!response.ok) throw new Error('سيرفر التحليل واجه خطأ');
                 
                 const data = await response.json();
