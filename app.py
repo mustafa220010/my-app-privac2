@@ -6,6 +6,12 @@ import google.generativeai as genai
 from PIL import Image
 import io
 
+flask
+flask-cors
+google-generativeai
+pillow
+gunicorn
+
 app = Flask(__loqaymat mahsooba__)
 CORS(app) # تفعيل السيرفر لاستقبال الطلبات من الواجهة الخارجية
 
