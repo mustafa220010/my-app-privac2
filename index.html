@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حاسب السعرات الذكي</title>
+    <!-- مكتبة جوجل الرسمية لتسجيل الدخول -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         :root {
@@ -55,7 +56,7 @@
 
         .fixed-bottom-ad { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--extra-bg); border-top: 2px solid var(--border-color); color: var(--section-title); text-align: center; padding: 12px; font-size: 13px; font-weight: bold; z-index: 999; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
 
-        .image-placeholder { position: relative; width: 100%; height: 180px; background-color: var(--extra-bg); border: 2px dashed var(--border-color); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; font-size: 45px; overflow: hidden; }
+        .image-placeholder { position: relative; width: 100%; height: 220px; background-color: var(--extra-bg); border: 2px dashed var(--border-color); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; font-size: 45px; overflow: hidden; }
         .upload-progress { display: none; position: absolute; background: rgba(0,0,0,0.7); color: #48bb78; padding: 10px 20px; border-radius: 10px; font-size: 20px; font-weight: bold; z-index: 2; }
         #previewImage { display: none; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
 
@@ -101,6 +102,7 @@
     </div>
 
     <div class="app-container">
+        <!-- الشاشة الرئيسية -->
         <div id="mainScreen" class="screen active">
             <button class="btn-primary" onclick="switchScreen('calcScreen')" data-i18n="menu1">📸 1. تصوير لحساب السعرات</button>
             <button class="btn-primary" onclick="switchScreen('historyScreen')" data-i18n="menu2">📋 2. سجل الوجبات</button>
@@ -108,6 +110,7 @@
             <button class="btn-primary" onclick="switchScreen('infoScreen')" data-i18n="menu4">📖 4. طريقة الاستخدام</button>
         </div>
 
+        <!-- الإعدادات -->
         <div id="settingsScreen" class="screen">
             <h2 style="text-align: center;" data-i18n="settingsTitle">الإعدادات والمظهر</h2>
             <div class="advanced-box">
@@ -136,16 +139,17 @@
             <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtn">⬅️ رجوع للرئيسية</button>
         </div>
 
+        <!-- شاشة الحساب -->
         <div id="calcScreen" class="screen">
             <h2 style="text-align: center;" data-i18n="calcTitle">تحليل الوجبة</h2>
             <div id="imageBox" class="image-placeholder">
                 <span id="imageIcon">📸</span>
-                <img id="previewImage" src="" alt="">
+                <img id="previewImage" src="" alt="Meal Preview">
                 <div id="uploadProgress" class="upload-progress">0%</div>
             </div>
             <label class="btn-primary" style="display: block; text-align: center; cursor: pointer; border-radius: 12px; padding: 15px; color: white; font-weight: bold; margin-bottom: 10px;">
                 <span data-i18n="captureBtn">التقط أو ارفع صورة 📸</span>
-                <input type="file" id="mealImage" accept="image/*" capture="environment" style="display: none;">
+                <input type="file" id="mealImage" accept="image/*" style="display: none;">
             </label>
 
             <label class="checkbox-container">
@@ -179,10 +183,12 @@
             <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtnOnly">رجوع</button>
         </div>
 
+        <!-- شاشة النتيجة -->
         <div id="resultScreen" class="screen" style="text-align: center;">
             <h2 style="text-align: center;" data-i18n="resTitle">النتيجة التقريبية</h2>
             <div class="advanced-box" style="text-align: center; border-color: #48bb78; border-width: 2px;" id="caloriesBox">
-                <h3 id="mealNameDisplay" style="color: var(--text-color); margin-bottom: 5px; margin-top: 0; display: none;"></h3>
+                <!-- عرض اسم الوجبة فوق السعرات -->
+                <h3 id="mealNameDisplay" style="color: var(--text-color); margin-bottom: 8px; margin-top: 0; font-size: 18px; display: none;"></h3>
                 <h1 id="finalCalories" style="color: #48bb78; margin: 0; font-size: 50px;">0</h1>
                 <p style="margin-top: 5px; font-weight: bold;" data-i18n="kcalText">سعرة حرارية (Kcal)</p>
             </div>
@@ -202,6 +208,7 @@
             <button class="btn-primary" style="margin-top: 10px;" onclick="switchScreen('mainScreen')" data-i18n="homeBtn">🏠 الرئيسية</button>
         </div>
 
+        <!-- سجل الوجبات -->
         <div id="historyScreen" class="screen">
             <h2 style="text-align: center;" data-i18n="histTitle">سجل الوجبات</h2>
             <div style="text-align: left; margin-bottom: 10px;" id="clearHistoryDiv">
@@ -211,6 +218,7 @@
             <button class="btn-back" onclick="switchScreen('mainScreen')" style="margin-top: 15px;" data-i18n="backBtnOnly">رجوع</button>
         </div>
 
+        <!-- الحساب الشخصي (جوجل) -->
         <div id="profileScreen" class="screen">
             <h2 style="text-align: center;" data-i18n="profTitle">الحساب الشخصي</h2>
             <div id="loginSection" style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;">
@@ -225,6 +233,7 @@
             <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtnOnly">رجوع</button>
         </div>
 
+        <!-- معلومات الاستخدام -->
         <div id="infoScreen" class="screen">
             <h2 style="text-align: center;" data-i18n="infoTitle">طريقة الاستخدام</h2>
             <div class="advanced-box" style="line-height: 1.8;" id="infoTextContainer">
@@ -235,6 +244,7 @@
         </div>
     </div>
 
+    <!-- بنر الإعلانات الثابت أسفل الشاشة كاملاً بدون مقاطعة الحساب -->
     <div class="fixed-bottom-ad" data-i18n="adSpace">مساحة إعلانية (Google AdSense Banner)</div>
 
     <script>
@@ -245,10 +255,10 @@
                 adSpace: "مساحة إعلانية (Google AdSense Banner)", settingsTitle: "الإعدادات", langLabel: "اللغة:",
                 themeLabel: "النمط:", themeSys: "تلقائي", themeLight: "فاتح", themeDark: "داكن",
                 colorLabel: "اللون:", colorBlue: "أزرق", colorGreen: "أخضر", colorRed: "أحمر",
-                backBtn: "رجوع", backBtnOnly: "رجوع", calcTitle: "التحليل", captureBtn: "رفع صورة",
+                backBtn: "رجوع", backBtnOnly: "رجوع", calcTitle: "التحليل", captureBtn: "رفع صورة 📸",
                 advToggle: "⚙️ خيارات متقدمة", cookMethod: "طريقة الطبخ:", cookOpt1: "-- اختر --", cookOpt2: "مشوي", cookOpt3: "مسلوق", cookOpt4: "مقلي",
                 proteinType: "البروتين:", protOpt1: "-- اختر --", protOpt2: "دجاج", protOpt3: "لحم", protOpt4: "سمك",
-                extraIngLabel: "مكونات إضافية:", addIngBtn: "➕ إضافة", calcNowBtn: "احسب السعرات 🔥",
+                extraIngLabel: "مكونات إضافية:", addIngBtn: "➕ إضافة", calcNowBtn: "احسب السعرات الآن 🔥",
                 resTitle: "النتيجة", kcalText: "سعرة (Kcal)", aiTipsLabel: "💡 نصائح:", tip1: "📉 للتقليل:", tip2: "🥗 صحياً:",
                 backEditBtn: "⬅️ تعديل", shareBtn: "📲 مشاركة", homeBtn: "🏠 الرئيسية", histTitle: "السجل", clearHistBtn: "🗑️ مسح",
                 emptyHist: "لا توجد وجبات.", profTitle: "حسابي", loginDesc: "سجل لحفظ البيانات", infoTitle: "الاستخدام", info1: "1. صور الوجبة.", info2: "2. استخدم المتقدم لدقة أعلى.",
@@ -260,7 +270,7 @@
                 adSpace: "Google AdSense Banner Space", settingsTitle: "Settings", langLabel: "Language:",
                 themeLabel: "Theme:", themeSys: "Auto", themeLight: "Light", themeDark: "Dark",
                 colorLabel: "Color:", colorBlue: "Blue", colorGreen: "Green", colorRed: "Red",
-                backBtn: "Back", backBtnOnly: "Back", calcTitle: "Analysis", captureBtn: "Upload Image",
+                backBtn: "Back", backBtnOnly: "Back", calcTitle: "Analysis", captureBtn: "Upload Image 📸",
                 advToggle: "⚙️ Advanced", cookMethod: "Cooking:", cookOpt1: "-- Select --", cookOpt2: "Grilled", cookOpt3: "Boiled", cookOpt4: "Fried",
                 proteinType: "Protein:", protOpt1: "-- Select --", protOpt2: "Chicken", protOpt3: "Meat", protOpt4: "Fish",
                 extraIngLabel: "Extra:", addIngBtn: "➕ Add", calcNowBtn: "Calculate 🔥",
@@ -334,25 +344,37 @@
             checkOnlineStatus(); loadSavedSettings(); renderHistory(); changeTheme(); checkSavedGoogleUser();
         };
 
+        // تحديث الكود الخاص برفع الصورة لحل مشكلة الجوالات نهائياً عبر كائن URL الخفيف
         document.getElementById('mealImage').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if(!file) return;
-            const progress = document.getElementById('uploadProgress');
+            
             const imgEl = document.getElementById('previewImage');
             const icon = document.getElementById('imageIcon');
-            const reader = new FileReader();
+            const progress = document.getElementById('uploadProgress');
             
-            icon.style.display = 'none'; imgEl.style.display = 'none'; progress.style.display = 'block';
-            let percent = 0;
-            const interval = setInterval(() => {
-                percent += 20; progress.innerText = `${percent}%`;
-                if(percent >= 100) { clearInterval(interval); reader.readAsDataURL(file); }
-            }, 100);
-
-            reader.onload = function(event) { progress.style.display = 'none'; imgEl.src = event.target.result; imgEl.style.display = 'block'; }
+            // استخدام كائن URL المباشر لأنه خفيف جداً على متصفحات الجوال ولا يستهلك الذاكرة مثل FileReader
+            try {
+                if (window.blobUrlRef) { URL.revokeObjectURL(window.blobUrlRef); } // تنظيف الذاكرة السابقة
+                window.blobUrlRef = URL.createObjectURL(file);
+                
+                icon.style.display = 'none';
+                progress.style.display = 'none';
+                imgEl.src = window.blobUrlRef;
+                imgEl.style.display = 'block';
+            } catch (err) {
+                console.error("فشل استخدام كائن URL، جاري الانتقال للحل الاحتياطي:", err);
+                // حل احتياطي في حال عدم دعم المتصفح
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    icon.style.display = 'none';
+                    imgEl.src = event.target.result;
+                    imgEl.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
         });
 
-        // نظام تسجيل الدخول بجوجل
         function handleGoogleLogin(response) {
             const base64Url = response.credential.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -384,6 +406,7 @@
 
         function saveToHistory(calories, mealName) {
             const dateString = new Date().toLocaleDateString('en-GB') + " " + new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+            // حفظ اسم الوجبة بجوار السعرات في سجل الكوكيز المحلي
             userHistory.push({ date: dateString, calories: calories, mealName: mealName || "" });
             localStorage.setItem('appUserHistory', JSON.stringify(userHistory));
             renderHistory();
@@ -397,7 +420,7 @@
                 <div class="history-item">
                     <span style="font-size:14px; color:gray;">${item.date}</span>
                     <div style="text-align: left; direction: ltr;">
-                        ${item.mealName ? `<strong style="color: var(--primary-color); display: block; font-size: 14px; margin-bottom: 3px;">🍽️ ${item.mealName}</strong>` : ''}
+                        ${item.mealName ? `<strong style="color: var(--primary-color); display: block; font-size: 14px; margin-bottom: 3px; text-align: right; direction: rtl;">🍽️ ${item.mealName}</strong>` : ''}
                         <strong style="color: #48bb78;">${item.calories} Kcal</strong>
                     </div>
                 </div>
@@ -437,7 +460,7 @@
             document.getElementById('finalCalories').innerText = "0";
             document.getElementById('caloriesBox').style.borderColor = '#dd6b20';
             document.getElementById('finalCalories').style.color = '#dd6b20';
-            document.getElementById('mealNameDisplay').style.display = 'none';
+            document.getElementById('mealNameDisplay').style.display = 'none'; // إخفاء الاسم في حالة النتيجة صفر
             
             const errorCard = document.getElementById('errorExplanationCard');
             errorCard.innerText = i18n[lang][errorKey];
@@ -481,6 +504,7 @@
             formData.append('ingredients', JSON.stringify(ingredients));
 
             try {
+                // استبدل هذا الرابط برابط خدمة Render الخاصة بك عند الإطلاق للإنتاج المباشر
                 const response = await fetch('http://127.0.0.1:5000/analyze', { method: 'POST', body: formData });
                 if (!response.ok) throw new Error('سيرفر التحليل واجه خطأ');
                 
@@ -497,6 +521,7 @@
                     document.getElementById('caloriesBox').style.borderColor = '#48bb78';
                     document.getElementById('finalCalories').style.color = '#48bb78';
                     
+                    // إدارة ظهور اسم الوجبة (إخفاء تماماً إذا كانت فارغة أو غير معروفة)
                     const mealNameDisplay = document.getElementById('mealNameDisplay');
                     if (mealNameResult.trim() !== "") {
                         mealNameDisplay.innerText = mealNameResult;
@@ -526,7 +551,8 @@
 
         function shareResult() {
             const cals = document.getElementById('finalCalories').innerText;
-            const msg = `وجبتي تحتوي على ${cals} سعرة حرارية! 🥗🔥`;
+            const meal = document.getElementById('mealNameDisplay').innerText;
+            const msg = meal ? `وجبتي (${meal}) تحتوي على ${cals} سعرة حرارية! 🥗🔥` : `وجبتي تحتوي على ${cals} سعرة حرارية! 🥗🔥`;
             if (navigator.share) navigator.share({ text: msg }); else alert(msg);
         }
     </script>
