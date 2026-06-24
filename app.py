@@ -6,17 +6,11 @@ import google.generativeai as genai
 from PIL import Image
 import io
 
-flask
-flask-cors
-google-generativeai
-pillow
-gunicorn
-
 app = Flask(__name__)
 CORS(app) # تفعيل السيرفر لاستقبال الطلبات من الواجهة الخارجية
 
 # سحب مفتاح الـ API بشكل آمن من إعدادات البيئة في Render لحماية حسابك
-GOOGLE_API_KEY = https://mhswb.onrender.com/("gen-lang-client-0565529644", "srv-d8t0sfnlk1mc73ahhu7g")
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "YOUR_FALLBACK_API_KEY_HERE")
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # استخدام أحدث النماذج السريعة والذكية لتحليل الصور والنصوص فورياً
