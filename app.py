@@ -1,9 +1,11 @@
-from flask import Flask, request, jsonify # هذا السطر هو الأهم!
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
+import io
 import google.generativeai as genai
+from PIL import Image
 
-app = Flask(__name__) # الآن سيعرف البرنامج ما هو الـ Flask
+app = Flask(__name__)
 CORS(app) # تفعيل السيرفر لاستقبال الطلبات من الواجهة الخارجية
 
 # سحب مفتاح الـ API بشكل آمن من إعدادات البيئة في Render لحماية حسابك
