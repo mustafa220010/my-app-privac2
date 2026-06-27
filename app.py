@@ -1,35 +1,24 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import os
-import io
-import google.generativeai as genai
-from PIL import Image
-
-app = Flask(__name__)
-CORS(app) # تفعيل السيرفر لاستقبال الطلبات من الواجهة الخارجية
-
-# سحب مفتاح الـ API بشكل آمن من إعدادات البيئة في Render لحماية حسابك
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "YOUR_FALLBACK_API_KEY_HERE")
-genai.configure(api_key=GOOGLE_API_KEY)
-
-# استخدام أحدث النماذج السريعة والذكية لتحليل الصور والنصوص فورياً
-model = genai.GenerativeModel('gemini-1.5-flash')
-
 @app.route('/analyze', methods=['POST'])
 def analyze_meal():
     try:
+        # 1. استلام البيانات أولاً
+        cooking_method = request.form.get('cooking_method', 'none')
+        protein_type = request.form.get('proteinType', 'none')
+        ingredients_json = request.form.get('ingredients', '[]')
+        image_file = request.files.get('image')
+
+        # 2. الطباعة للتحقق بعد استلام البيانات
         print(f"Received cooking_method: {cooking_method}")
-    print(f"Received image_file: {image_file}")
-       # 1. استلام البيانات أولاً
-cooking_method = request.form.get('cooking_method', 'none')
-protein_type = request.form.get('proteinType', 'none')
-ingredients_json = request.form.get('ingredients', '[]')
-image_file = request.files.get('image')
+        print(f"Received image_file: {image_file}")
 
-# 2. ثم الطباعة للتحقق (بعد تعريف المتغيرات)
-print(f"Received cooking_method: {cooking_method}")
-print(f"Received image_file: {image_file}")
+        # ... (باقي كود معالجة الصورة والبرومبت) ...
 
+        return jsonify({"result": "success"}) # مثال للرد
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
+        
         # 3. صياغة التعليمات الهيكلية الدقيقة لإجبار الذكاء الاصطناعي على توفير صيغة جيسون مطابقة تماماً لواجهة البرنامج
          prompt = f"حلل الصورة وأعطني الرد بتنسيق JSON فقط يحتوي على: calories (رقم), mealName (نص), tipReduce (نص), tipVeggies (نص). لا تضف أي نص آخر."
         أنت خبير تغذية وحساب سعرات حرارية ذكي. قم بتحليل الوجبة المرفقة (عبر الصورة أو المكونات).
