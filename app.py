@@ -18,20 +18,20 @@ model = genai.GenerativeModel('gemini-1.5-flash')
 @app.route('/analyze', methods=['POST'])
 def analyze_meal():
     try:
-        # 1. استقبال المكونات والبيانات المتقدمة من الواجهة
-        cooking_method = request.form.get('cookingMethod', 'none')
-        protein_type = request.form.get('proteinType', 'none')
-        ingredients_json = request.form.get('ingredients', '[]')
-        
-        # 2. التحقق من وجود ملف الصورة ومعالجته
-        image_file = request.files.get('image')
-        img_object = None
-        if image_file:
-            image_bytes = image_file.read()
-            img_object = Image.open(io.BytesIO(image_bytes))
+        print(f"Received cooking_method: {cooking_method}")
+    print(f"Received image_file: {image_file}")
+       # 1. استلام البيانات أولاً
+cooking_method = request.form.get('cooking_method', 'none')
+protein_type = request.form.get('proteinType', 'none')
+ingredients_json = request.form.get('ingredients', '[]')
+image_file = request.files.get('image')
+
+# 2. ثم الطباعة للتحقق (بعد تعريف المتغيرات)
+print(f"Received cooking_method: {cooking_method}")
+print(f"Received image_file: {image_file}")
 
         # 3. صياغة التعليمات الهيكلية الدقيقة لإجبار الذكاء الاصطناعي على توفير صيغة جيسون مطابقة تماماً لواجهة البرنامج
-        prompt = f"""
+         prompt = f"حلل الصورة وأعطني الرد بتنسيق JSON فقط يحتوي على: calories (رقم), mealName (نص), tipReduce (نص), tipVeggies (نص). لا تضف أي نص آخر."
         أنت خبير تغذية وحساب سعرات حرارية ذكي. قم بتحليل الوجبة المرفقة (عبر الصورة أو المكونات).
         
         البيانات المتقدمة المتاحة للطبخ:
