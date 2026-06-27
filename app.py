@@ -1,6 +1,6 @@
 @app.route('/analyze', methods=['POST'])
 def analyze_meal():
-try:
+    try:
     # 1. استلام البيانات أولاً (هذه يجب أن تبدأ بـ 4 مسافات)
     cooking_method = request.form.get('cooking_method', 'none')
     protein_type = request.form.get('proteinType', 'none')
@@ -16,7 +16,7 @@ try:
         
         # ... (باقي الكود) ...
 
-except Exception as e:
+    except Exception as e:
         print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
         
