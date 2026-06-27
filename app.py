@@ -14,7 +14,7 @@ GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "YOUR_FALLBACK_API_KEY_HERE")
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # استخدام أحدث النماذج
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
 @app.route('/analyze', methods=['POST'])
 def analyze_meal():
