@@ -2,17 +2,17 @@
 def analyze_meal():
     try:
         # 1. استلام البيانات أولاً (هذه يجب أن تبدأ بـ 4 مسافات)
-        cooking_method = request.form.get('cooking_method', 'none')
-        protein_type = request.form.get('proteinType', 'none')
-        ingredients_json = request.form.get('ingredients', '[]')
-        image_file = request.files.get('image')
+    cooking_method = request.form.get('cooking_method', 'none')
+    protein_type = request.form.get('proteinType', 'none')
+    ingredients_json = request.form.get('ingredients', '[]')
+    image_file = request.files.get('image')
 
         # 2. الطباعة للتحقق (هذه أيضاً يجب أن تبدأ بـ 4 مسافات)
-        print(f"Received cooking_method: {cooking_method}")
-        print(f"Received image_file: {image_file}")
+    print(f"Received cooking_method: {cooking_method}")
+    print(f"Received image_file: {image_file}")
 
         # 3. تعريف الـ prompt (تأكد ألا يكون هناك مسافة إضافية في بداية هذا السطر!)
-        prompt = "حلل الصورة وأعطني الرد بتنسيق JSON فقط يحتوي على: calories (رقم), mealName (نص), tipReduce (نص), tipVeggies (نص). لا تضف أي نص آخر."
+    prompt = "حلل الصورة وأعطني الرد بتنسيق JSON فقط يحتوي على: calories (رقم), mealName (نص), tipReduce (نص), tipVeggies (نص). لا تضف أي نص آخر."
         
         # ... (باقي الكود) ...
 
