@@ -1,10 +1,3 @@
-import os
-import json
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import google.generativeai as genai
-from PIL import Image
-import io
 
 app = Flask(__name__)
 CORS(app) # تفعيل السيرفر لاستقبال الطلبات من الواجهة الخارجية
