@@ -17,20 +17,23 @@ model = genai.GenerativeModel('gemini-1.5-flash')
 
 @app.route('/analyze', methods=['POST'])
 def analyze_meal():
-    try:
-        cooking_method = request.form.get('cooking_method', 'none')
-        protein_type = request.form.get('proteinType', 'none')
-        ingredients_json = request.form.get('ingredients', '[]')
-        image_file = request.files.get('image')
+   import google.generativeai as genai
 
-        print(f"Received cooking_method: {cooking_method}")
-        print(f"Received image_file: {image_file}")
+# ضع المفتاح هنا وتأكد من عدم وجود مسافات قبل أو بعد الحروف
+GOOGLE_API_KEY = "ضع_المفتاح_الجديد_هنا"
 
-        img_object = None
-        if image_file:
-            image_bytes = image_file.read()
-            img_object = Image.open(io.BytesIO(image_bytes))
-
+try:
+    genai.configure(api_key=GOOGLE_API_KEY)
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    
+    print("جاري الاتصال بالسيرفر...")
+    response = model.generate_content("مرحباً، هل المفتاح يعمل الآن؟")
+    
+    print("النتيجة:")
+    print(response.text)
+    
+except Exception as e:
+    print(f"حدث خطأ: {e}")
         prompt = f"""
 أنت خبير تغذية وحساب سعرات حرارية ذكي. قم بتحليل الوجبة المرفقة.
 البيانات المتاحة للطبخ:
