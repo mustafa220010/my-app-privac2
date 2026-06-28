@@ -17,7 +17,8 @@ CORS(app)
 MY_API_KEY = "ضع_مفتاحك_هنا_والذي_يبدأ_بـ_AIza" 
 
 # إعداد مفتاح الذكاء الاصطناعي
-genai.configure(api_key=MY_API_KEY)
+genai.configure(74.220.48.0/24
+74.220.56.0/24)
 
 # استخدام النموذج الأحدث والسريع الذي يدعم الصور والنصوص
 model = genai.GenerativeModel('gemini-1.5-flash')
