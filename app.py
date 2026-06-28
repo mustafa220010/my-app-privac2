@@ -9,33 +9,28 @@ from PIL import Image
 app = Flask(__name__)
 CORS(app)
 
-# إعداد مفتاح API بشكل آمن
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "YOUR_FALLBACK_API_KEY_HERE")
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# استخدام أحدث النماذج
-model = genai.GenerativeModel('gemini-1.0-pro')
+# 1. التحديث إلى نموذج يدعم الصور والنصوص معاً
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 @app.route('/analyze', methods=['POST'])
 def analyze_meal():
     try:
-        # 1. استلام البيانات
         cooking_method = request.form.get('cooking_method', 'none')
         protein_type = request.form.get('proteinType', 'none')
         ingredients_json = request.form.get('ingredients', '[]')
         image_file = request.files.get('image')
 
-        # 2. الطباعة للتحقق في سجلات السيرفر
         print(f"Received cooking_method: {cooking_method}")
         print(f"Received image_file: {image_file}")
 
-        # 3. معالجة الصورة
         img_object = None
         if image_file:
             image_bytes = image_file.read()
             img_object = Image.open(io.BytesIO(image_bytes))
 
-        # 4. البرومبت (خالي تماماً من الفواصل العربية)
         prompt = f"""
 أنت خبير تغذية وحساب سعرات حرارية ذكي. قم بتحليل الوجبة المرفقة.
 البيانات المتاحة للطبخ:
@@ -43,22 +38,36 @@ def analyze_meal():
 - نوع البروتين المضاف: {protein_type}
 - مكونات إضافية تم إدخالها بالجرام: {ingredients_json}
 
-يجب إرجاع النتيجة بصيغة JSON فقط يحتوي على المفاتيح التالية باللغة العربية:
-1. "calories": (ضع عدد السعرات الإجمالية التقديرية كرقم صحيح فقط). إذا كانت الوجبة غير واضحة تماماً أو غير معروفة أو الصورة لا تحتوي على طعام, ضع القيمة 0.
-2. "mealName": (ضع اسم الوجبة المكتشفة مثل "كبسة دجاج", "سلطة يونانية"). إذا لم يتم معرفة اسم الوجبة أو كانت البيانات مبهمة, اترك النص فارغاً تماماً "".
-3. "tipReduce": (نصيحة ذكية وموجزة ومخصصة لتقليل السعرات في هذه الوجبة المحددة).
-4. "tipVeggies": (نصيحة لتعزيز القيمة الغذائية أو إضافة خضار تتناسب مع الوجبة).
+قم بإرجاع النتيجة بدقة وبصيغة JSON فقط.
 """
 
-        # 5. إرسال الطلب لنموذج الذكاء الاصطناعي
-        if img_object:
-            response = model.generate_content([prompt, img_object])
-        else:
-            response = model.generate_content(prompt)
+        # 2. إجبار النموذج على إرجاع JSON نظيف متوافق مع متطلباتك
+        generation_config = genai.GenerationConfig(
+            response_mime_type="application/json",
+            response_schema={
+                "type": "OBJECT",
+                "properties": {
+                    "calories": {"type": "INTEGER", "description": "Total estimated calories. 0 if unclear or no food."},
+                    "mealName": {"type": "STRING", "description": "Name of the meal in Arabic, empty if unknown."},
+                    "tipReduce": {"type": "STRING", "description": "Short tip in Arabic to reduce calories."},
+                    "tipVeggies": {"type": "STRING", "description": "Tip in Arabic to add veggies or enhance nutrition."}
+                },
+                "required": ["calories", "mealName", "tipReduce", "tipVeggies"]
+            }
+        )
 
-        # 6. تنظيف النص المستلم وتحويله لرد برمجي (JSON)
-        result_text = response.text.replace('```json', '').replace('```', '').strip()
-        final_result = json.loads(result_text)
+        content_parts = [prompt]
+        if img_object:
+            content_parts.append(img_object)
+
+        # إرسال الطلب مع الإعدادات الجديدة
+        response = model.generate_content(
+            content_parts,
+            generation_config=generation_config
+        )
+
+        # 3. قراءة الـ JSON مباشرة دون الحاجة لتنظيف النص
+        final_result = json.loads(response.text)
         
         return jsonify(final_result)
 
