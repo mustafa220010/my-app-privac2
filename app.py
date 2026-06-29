@@ -1,31 +1,29 @@
 import os
 import io
 import json
+import base64
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import google.generativeai as genai
+from groq import Groq
 from PIL import Image, UnidentifiedImageError
 
 app = Flask(__name__)
 # السماح بجميع الاتصالات لتجنب أخطاء CORS
 CORS(app)
 
-# 1. جلب المفتاح بشكل آمن من إعدادات Render
-# ملاحظة: يجب إضافة متغير باسم GOOGLE_API_KEY في منصة Render ووضع المفتاح الذي يبدأ بـ AIza فيه
-MY_API_KEY = os.environ.get("GOOGLE_API_KEY")
+# جلب المفتاح بشكل آمن من إعدادات Render (يجب أن يبدأ بـ gsk_)
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
-if not MY_API_KEY:
-    print("تحذير: لم يتم العثور على مفتاح API! يرجى إضافته في إعدادات البيئة (Environment Variables).")
+if not GROQ_API_KEY:
+    print("تحذير: لم يتم العثور على مفتاح GROQ API! يرجى إضافته في إعدادات البيئة.")
 
-# إعداد الذكاء الاصطناعي
-genai.configure(api_key=MY_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+# إعداد عميل Groq
+client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 @app.route('/analyze', methods=['POST'])
 def analyze_meal():
     try:
-        # التأكد من وجود مفتاح API قبل البدء
-        if not MY_API_KEY:
+        if not client:
             return jsonify({"error": "مشكلة في السيرفر: مفتاح الذكاء الاصطناعي مفقود."}), 500
 
         # استقبال البيانات من التطبيق
@@ -34,56 +32,73 @@ def analyze_meal():
         ingredients_json = request.form.get('ingredients', '[]')
         image_file = request.files.get('image')
 
-        # معالجة الصورة واكتشاف الأخطاء فيها
-        img_object = None
+        # معالجة الصورة وتحويلها لصيغة Base64 التي يفهمها Groq
+        base64_image = None
         if image_file:
             try:
                 image_bytes = image_file.read()
+                # التأكد من أن الملف صورة صالحة
                 img_object = Image.open(io.BytesIO(image_bytes))
+                
+                # تحويل الصورة إلى صيغة متوافقة (JPEG) لتقليل الحجم
+                if img_object.mode != 'RGB':
+                    img_object = img_object.convert('RGB')
+                
+                buffered = io.BytesIO()
+                img_object.save(buffered, format="JPEG")
+                
+                # تشفير الصورة
+                base64_image = base64.b64encode(buffered.getvalue()).decode('utf-8')
             except UnidentifiedImageError:
                 return jsonify({"error": "الملف المرفق ليس صورة صالحة أو أنه تالف."}), 400
-            except Exception as e:
-                return jsonify({"error": f"فشل في قراءة الصورة: {str(e)}"}), 400
         else:
             return jsonify({"error": "الرجاء إرفاق صورة للوجبة."}), 400
 
-        # تجهيز السؤال
+        # تجهيز السؤال والنظام المطلوب إرجاعه (JSON)
         prompt = f"""
 أنت خبير تغذية ذكي. قم بتحليل الوجبة في الصورة المرفقة.
-البيانات الإضافية:
+البيانات الإضافية للطبخ:
 - طريقة الطبخ: {cooking_method}
 - نوع البروتين: {protein_type}
 - مكونات إضافية: {ingredients_json}
 
-إذا كانت الصورة غير واضحة، أو لا تحتوي على طعام، أو لا يمكنك التعرف عليها، اجعل قيمة "status" هي "unclear".
-إذا تعرفت على الطعام، اجعل قيمة "status" هي "success" وأكمل باقي البيانات.
-يجب إرجاع النتيجة بصيغة JSON فقط.
+يجب إرجاع النتيجة بصيغة JSON فقط، باستخدام هذا الهيكل تماماً:
+{{
+  "status": "اكتب success إذا تعرفت على الطعام، أو unclear إذا كانت الصورة غير واضحة",
+  "calories": 0, 
+  "mealName": "اسم الوجبة بالعربية",
+  "tipReduce": "نصيحة قصيرة لتقليل السعرات",
+  "tipVeggies": "نصيحة لإضافة الخضار"
+}}
 """
 
-        # إجبار النموذج على هيكل JSON محدد يسهل التعامل معه
-        generation_config = genai.GenerationConfig(
-            response_mime_type="application/json",
-            response_schema={
-                "type": "OBJECT",
-                "properties": {
-                    "status": {"type": "STRING", "description": "'success' if food is identified, 'unclear' if not food or unclear."},
-                    "calories": {"type": "INTEGER", "description": "Estimated calories. 0 if unclear."},
-                    "mealName": {"type": "STRING", "description": "Meal name in Arabic."},
-                    "tipReduce": {"type": "STRING", "description": "Tip in Arabic to reduce calories."},
-                    "tipVeggies": {"type": "STRING", "description": "Tip in Arabic to enhance nutrition."}
-                },
-                "required": ["status", "calories", "mealName", "tipReduce", "tipVeggies"]
+        # تجهيز الرسالة التي سيتم إرسالها إلى نموذج Groq (نص + صورة)
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{base64_image}"
+                        }
+                    }
+                ]
             }
+        ]
+
+        # إرسال الطلب لنموذج الرؤية الخاص بـ Groq (Llama 3.2 Vision)
+        response = client.chat.completions.create(
+            model="llama-3.2-90b-vision-preview",
+            messages=messages,
+            response_format={"type": "json_object"},
+            temperature=0.2
         )
 
-        # إرسال الطلب للذكاء الاصطناعي
-        response = model.generate_content(
-            [prompt, img_object],
-            generation_config=generation_config
-        )
-
-        # تحويل الرد إلى قاموس
-        final_result = json.loads(response.text)
+        # استخراج النتيجة
+        result_text = response.choices[0].message.content
+        final_result = json.loads(result_text)
 
         # التحقق مما إذا كان الذكاء الاصطناعي لم يتعرف على الصورة
         if final_result.get("status") == "unclear":
@@ -91,16 +106,13 @@ def analyze_meal():
                 "error": "عذراً، الصورة غير واضحة أو لا تبدو كوجبة طعام. يرجى التقاط صورة أوضح."
             }), 400
 
-        # إذا سار كل شيء على ما يرام، أرسل النتيجة
         return jsonify(final_result)
 
     except Exception as e:
-        # التقاط أي أخطاء مفاجئة في السيرفر أو من API جوجل
         print(f"Server Error: {e}")
-        return jsonify({"error": f"حدث خطأ داخلي في السيرفر أو في الاتصال بالذكاء الاصطناعي: {str(e)}"}), 500
+        return jsonify({"error": f"حدث خطأ داخلي في السيرفر أو في الاتصال بـ Groq: {str(e)}"}), 500
 
-# إعداد السيرفر ليعمل على Render أو محلياً
+# تشغيل السيرفر
 if __name__ == '__main__':
-    # منصة Render تتطلب أن يكون الـ host هو 0.0.0.0 وأن يأخذ الـ port من بيئة التشغيل
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
