@@ -14,7 +14,7 @@ CORS(app)
 # ⚠️ ضع مفتاحك الجديد هنا بين علامات التنصيص
 # تأكد أن المفتاح يبدأ بـ AIza ولا توجد مسافات قبله أو بعده
 # ==========================================
-genai.configure(api_key=MY_API_KEY)
+genai.configure(https://my-app-privac2-1.onrender.com)
 
 # إعداد مفتاح الذكاء الاصطناعي
 genai.configure(https://my-app-privac2-1.onrender.com)
