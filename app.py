@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 # ضع مفتاحك هنا، وتأكد أنه يبدأ بـ AIza
-MY_API_KEY = "AIzaAQ.Ab8RN6JxEk1upEmHg_qEPWBrYE2B0ARb-JCIOfhLGK8Q_TUTlw" 
+MY_API_KEY = "https://my-app-privac2-1.onrender.com" 
 
 genai.configure(api_key=MY_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
