@@ -8,14 +8,11 @@ from groq import Groq
 from PIL import Image, UnidentifiedImageError
 
 app = Flask(__name__)
-# السماح بجميع الاتصالات لتجنب أخطاء CORS
+# تفعيل CORS للسماح لموقعك بالاتصال بالسيرفر بدون مشاكل
 CORS(app)
 
-# جلب المفتاح بشكل آمن من إعدادات Render (يجب أن يبدأ بـ gsk_)
+# جلب مفتاح Groq بشكل آمن من إعدادات Render (Environment Variables)
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-
-if not GROQ_API_KEY:
-    print("تحذير: لم يتم العثور على مفتاح GROQ API! يرجى إضافته في إعدادات البيئة.")
 
 # إعداد عميل Groq
 client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
@@ -23,56 +20,63 @@ client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 @app.route('/analyze', methods=['POST'])
 def analyze_meal():
     try:
+        # التأكد من وجود المفتاح في السيرفر
         if not client:
-            return jsonify({"error": "مشكلة في السيرفر: مفتاح الذكاء الاصطناعي مفقود."}), 500
+            return jsonify({"error": "مشكلة في السيرفر: مفتاح الذكاء الاصطناعي (GROQ_API_KEY) مفقود في الإعدادات."}), 500
 
-        # استقبال البيانات من التطبيق
+        # 1. استقبال البيانات القادمة من الواجهة الأمامية
         cooking_method = request.form.get('cooking_method', 'غير محدد')
         protein_type = request.form.get('proteinType', 'غير محدد')
         ingredients_json = request.form.get('ingredients', '[]')
         image_file = request.files.get('image')
 
-        # معالجة الصورة وتحويلها لصيغة Base64 التي يفهمها Groq
+        # 2. التحقق من وجود الصورة ومعالجتها وتحويلها إلى Base64
         base64_image = None
         if image_file:
             try:
                 image_bytes = image_file.read()
-                # التأكد من أن الملف صورة صالحة
+                # التأكد من أن الملف المرفق هو صورة حقيقية وصالحة
                 img_object = Image.open(io.BytesIO(image_bytes))
                 
-                # تحويل الصورة إلى صيغة متوافقة (JPEG) لتقليل الحجم
+                # تحويل الصورة إلى صيغة RGB لضمان التوافق (وتجنب مشاكل صور PNG الشفافة)
                 if img_object.mode != 'RGB':
                     img_object = img_object.convert('RGB')
                 
+                # ضغط الصورة لحجم مناسب للرفع السريع
                 buffered = io.BytesIO()
-                img_object.save(buffered, format="JPEG")
+                img_object.save(buffered, format="JPEG", quality=85)
                 
-                # تشفير الصورة
+                # التشفير بصيغة Base64
                 base64_image = base64.b64encode(buffered.getvalue()).decode('utf-8')
             except UnidentifiedImageError:
                 return jsonify({"error": "الملف المرفق ليس صورة صالحة أو أنه تالف."}), 400
+            except Exception as e:
+                return jsonify({"error": f"فشل السيرفر في قراءة ملف الصورة: {str(e)}"}), 400
         else:
-            return jsonify({"error": "الرجاء إرفاق صورة للوجبة."}), 400
+            return jsonify({"error": "الرجاء إرفاق صورة للوجبة، السيرفر لم يستقبل أي صورة."}), 400
 
-        # تجهيز السؤال والنظام المطلوب إرجاعه (JSON)
+        # 3. صياغة السؤال (Prompt) وإجبار الذكاء الاصطناعي على رد JSON محدد
         prompt = f"""
 أنت خبير تغذية ذكي. قم بتحليل الوجبة في الصورة المرفقة.
-البيانات الإضافية للطبخ:
-- طريقة الطبخ: {cooking_method}
-- نوع البروتين: {protein_type}
-- مكونات إضافية: {ingredients_json}
+البيانات الإضافية المساعدة للطبخ:
+- طريقة الطبخ الأساسية: {cooking_method}
+- نوع البروتين المضاف: {protein_type}
+- مكونات إضافية بالجرام: {ingredients_json}
 
-يجب إرجاع النتيجة بصيغة JSON فقط، باستخدام هذا الهيكل تماماً:
+إذا كانت الصورة غير واضحة، أو مظلمة جداً، أو لا تحتوي على طعام، أو لا يمكنك التعرف عليها كوجبة، اجعل قيمة "status" هي "unclear".
+أما إذا تعرفت على الطعام، اجعل قيمة "status" هي "success" وأكمل باقي البيانات المكتوبة باللغة العربية.
+
+يجب إرجاع النتيجة بصيغة JSON فقط، وبنفس هذا الهيكل تماماً وبدون أي نصوص خارج الأقواس:
 {{
-  "status": "اكتب success إذا تعرفت على الطعام، أو unclear إذا كانت الصورة غير واضحة",
+  "status": "success أو unclear",
   "calories": 0, 
   "mealName": "اسم الوجبة بالعربية",
-  "tipReduce": "نصيحة قصيرة لتقليل السعرات",
-  "tipVeggies": "نصيحة لإضافة الخضار"
+  "tipReduce": "نصيحة قصيرة ومحددة باللغة العربية لتقليل سعراتها",
+  "tipVeggies": "نصيحة باللغة العربية لإضافة خضار أو تحسين قيمتها الغذائية"
 }}
 """
 
-        # تجهيز الرسالة التي سيتم إرسالها إلى نموذج Groq (نص + صورة)
+        # 4. إعداد مصفوفة البيانات (النص + الصورة المشفرة)
         messages = [
             {
                 "role": "user",
@@ -88,31 +92,32 @@ def analyze_meal():
             }
         ]
 
-        # إرسال الطلب لنموذج الرؤية الخاص بـ Groq (Llama 3.2 Vision)
+        # 5. إرسال الطلب إلى نموذج الرؤية الخاص بـ Groq
         response = client.chat.completions.create(
             model="llama-3.2-90b-vision-preview",
             messages=messages,
-            response_format={"type": "json_object"},
-            temperature=0.2
+            response_format={"type": "json_object"}, # إجبار السيرفر على إرجاع JSON
+            temperature=0.1 # تقليل العشوائية للحصول على نتائج ثابتة
         )
 
-        # استخراج النتيجة
+        # 6. قراءة النتيجة وتحويلها لـ JSON لإرسالها للمستخدم
         result_text = response.choices[0].message.content
         final_result = json.loads(result_text)
 
-        # التحقق مما إذا كان الذكاء الاصطناعي لم يتعرف على الصورة
+        # إذا أفاد الذكاء الاصطناعي أن الصورة غير واضحة أو ليست طعاماً
         if final_result.get("status") == "unclear":
             return jsonify({
-                "error": "عذراً، الصورة غير واضحة أو لا تبدو كوجبة طعام. يرجى التقاط صورة أوضح."
+                "error": "عذراً، الصورة غير واضحة، أو لا تحتوي على وجبة طعام معروفة. يرجى التقاط صورة أوضح للوجبة."
             }), 400
 
+        # إرجاع النتيجة الناجحة للتطبيق
         return jsonify(final_result)
 
     except Exception as e:
-        print(f"Server Error: {e}")
-        return jsonify({"error": f"حدث خطأ داخلي في السيرفر أو في الاتصال بـ Groq: {str(e)}"}), 500
+        print(f"Server Error Log: {e}")
+        return jsonify({"error": f"حدث خطأ داخلي في السيرفر أو أثناء الاتصال بـ Groq: {str(e)}"}), 500
 
-# تشغيل السيرفر
+# تشغيل السيرفر ليتناسب مع بيئة Render المحمية ومحلياً أيضاً
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
