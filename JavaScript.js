@@ -572,20 +572,20 @@
 
             try {
               // استبدل الرابط القديم (اللوحي 127.0.0.1) برابط سيرفر Render الحي
-    const serverUrl = "https://my-app-privac2-1.onrender.com/analyze";
+              const serverUrl = "https://my-app-privac2-1.onrender.com/analyze";
 
-    // عند إرسال البيانات (مثال على دالة fetch لديك)
-    fetch(serverUrl, {
-    method: 'POST',
-    body: formData // إرسال الصورة والبيانات الأخرى
-    })
-    .then(response => response.json())
-    .then(data => {
-    console.log("النتيجة من السيرفر:", data);
-    })
-    .catch(error => {
-    console.error("حدث خطأ في الاتصال بالسيرفر:", error);
-    });
+             // عند إرسال البيانات (مثال على دالة fetch لديك)
+              fetch(serverUrl, {
+               method: 'POST',
+               body: formData // إرسال الصورة والبيانات الأخرى
+               })
+               .then(response => response.json())
+               .then(data => {
+                 console.log("النتيجة من السيرفر:", data);
+               })
+               .catch(error => {
+                 console.error("حدث خطأ في الاتصال بالسيرفر:", error);
+                });
                 
                 const data = await response.json();
                 const caloriesResult = parseInt(data.calories) || 0;
