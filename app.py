@@ -94,7 +94,7 @@ def analyze_meal():
 
         # 5. إرسال الطلب إلى نموذج الرؤية الخاص بـ Groq
         response = client.chat.completions.create(
-            model="llama-3.2-90b-vision-preview",
+            model="llama-3.2-90b-vision-instruct",
             messages=messages,
             response_format={"type": "json_object"}, # إجبار السيرفر على إرجاع JSON
             temperature=0.1 # تقليل العشوائية للحصول على نتائج ثابتة
