@@ -17,7 +17,7 @@ CORS(app)
 genai.configure(https://my-app-privac2-1.onrender.com)
 
 # إعداد مفتاح الذكاء الاصطناعي
-genai.configure(https://my-app-privac2-1.onrender.com)
+genai.configure(api_key=MY_API_KEY)
 
 # استخدام النموذج الأحدث والسريع الذي يدعم الصور والنصوص
 model = genai.GenerativeModel('gemini-1.5-flash')
