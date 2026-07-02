@@ -217,6 +217,37 @@
             <div id="historyContainer" class="history-card" style="max-height: 350px; overflow-y: auto;"></div>
             <button class="btn-back" onclick="switchScreen('mainScreen')" style="margin-top: 15px;" data-i18n="backBtnOnly">رجوع</button>
         </div>
+        <div style="margin-top: 40px; padding: 20px; background-color: #e3f2fd; border-radius: 10px; border: 1px solid #90caf9; color: #333;">
+    <h2>احسب احتياجك 🧮</h2>
+    
+    <label>الهدف من النظام:</label>
+    <select id="goal-select" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px;">
+        <option value="cut">تنشيف (خسارة دهون)</option>
+        <option value="bulk">تضخيم (بناء عضل)</option>
+    </select>
+
+    <label style="margin-top: 10px; display: block;">ماذا تريد أن تحسب؟</label>
+    <select id="calc-type-select" style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px;">
+        <option value="calories">السعرات الحرارية اليومية</option>
+        <option value="protein">احتياجك من البروتين</option>
+        <option value="carbs">احتياجك من الكربوهيدرات</option>
+    </select>
+
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <input type="number" id="calc-weight" placeholder="الوزن (كج)" style="width: 50%; padding: 10px; border-radius: 5px;" required>
+        <input type="number" id="calc-height" placeholder="الطول (سم)" style="width: 50%; padding: 10px; border-radius: 5px;" required>
+    </div>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <input type="number" id="calc-age" placeholder="العمر" style="width: 50%; padding: 10px; border-radius: 5px;" required>
+        <select id="calc-gender" style="width: 50%; padding: 10px; border-radius: 5px;">
+            <option value="male">ذكر</option>
+            <option value="female">أنثى</option>
+        </select>
+    </div>
+
+    <button onclick="calculateMacros()" style="width: 100%; padding: 12px; background-color: #1976d2; color: white; border: none; border-radius: 5px; margin-top: 15px; font-weight: bold; cursor: pointer;">احسب النتيجة</button>
+    <h3 id="calc-result" style="color: #d32f2f; text-align: center; margin-top: 15px;"></h3>
+    </div>
 
         <!-- الحساب الشخصي (جوجل) -->
         <div id="profileScreen" class="screen">
