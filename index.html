@@ -3,96 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق اللياقة الذكي</title>
+    <title>تطبيق السعرات الذكي</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        :root {
-            --bg-color: #f4f7f6; --primary-color: #3182ce; --screen-bg: #ffffff;
-            --text-color: #2d3748; --btn-text: #ffffff; --border-color: #cbd5e1;
-            --advanced-bg: #f8fafc; --extra-bg: #e2e8f0; --section-title: #475569;
-            --card-shadow: 0 8px 25px rgba(0,0,0,0.06); --success-color: #10b981;
-        }
-
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; }
+        :root { --primary-color: #3182ce; --bg-color: #f4f7f6; --screen-bg: #ffffff; --text-color: #2d3748; }
+        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
         .app-header { background: var(--primary-color); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
-        .app-container { padding: 20px; padding-bottom: 90px; } 
-        .screen { background: var(--screen-bg); max-width: 450px; margin: 0 auto; padding: 25px; border-radius: 20px; box-shadow: var(--card-shadow); display: none; }
+        .app-container { padding: 20px; max-width: 450px; margin: 0 auto; }
+        .screen { background: var(--screen-bg); padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none; }
         .active { display: block; }
-        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; color: var(--btn-text); font-weight: bold; }
-        .btn-primary { background-color: var(--primary-color); }
-        .btn-back { background-color: #94a3b8; }
-        .image-placeholder { width: 100%; height: 220px; background-color: var(--extra-bg); border: 2px dashed var(--border-color); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; font-size: 45px; overflow: hidden; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0 15px 0; border: 1px solid var(--border-color); border-radius: 10px; box-sizing: border-box; }
-        .advanced-box { background: var(--advanced-bg); border: 1px solid var(--border-color); padding: 18px; border-radius: 15px; margin-top: 15px; }
-        .checkbox-container { display: flex; align-items: center; margin: 15px 0; font-weight: bold; }
-        .history-item { border-bottom: 1px solid var(--border-color); padding: 10px 0; display: flex; justify-content: space-between; }
-        .error-card { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center; }
+        button { width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 10px; background: var(--primary-color); color: white; cursor: pointer; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div class="app-header">
-        <div onclick="switchScreen('profileScreen')">👤</div>
-        <h3>تطبيق اللياقة الذكي</h3>
-        <div onclick="switchScreen('settingsScreen')">⚙️</div>
+        <span onclick="switchScreen('profileScreen')">👤</span>
+        <h3>تطبيق السعرات</h3>
+        <select id="langSelector" onchange="changeLanguage()" style="width: auto; margin: 0;">
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+        </select>
     </div>
 
     <div class="app-container">
-        <!-- الشاشة الرئيسية (تم حذف زر التمارين) -->
         <div id="mainScreen" class="screen active">
-            <button class="btn-primary" onclick="switchScreen('calcScreen')">📸 1. تصوير لحساب السعرات</button>
-            <button class="btn-primary" onclick="switchScreen('historyScreen')">📋 2. سجل الوجبات</button>
-            <button class="btn-primary" onclick="switchScreen('macrosScreen')" style="background-color: #38bdf8;">🧮 3. احسب احتياجك اليومي</button>
+            <button onclick="switchScreen('calcScreen')">📸 حساب سعرات الوجبة</button>
+            <button onclick="switchScreen('historyScreen')">📋 سجل الوجبات</button>
+            <button onclick="switchScreen('macrosScreen')">🧮 حاسبة الاحتياج اليومي</button>
         </div>
 
-        <!-- شاشة تحليل الوجبة -->
         <div id="calcScreen" class="screen">
-            <div id="imageBox" class="image-placeholder">📸</div>
-            <input type="file" id="mealImage" accept="image/*">
-            <label class="checkbox-container"><input type="checkbox" id="advancedToggle" onchange="toggleAdvanced()"> فتح الخيارات المتقدمة</label>
-            <div id="advancedOptions" class="advanced-box" style="display: none;">
-                <select id="cookingMethod"><option value="none">طريقة الطبخ</option><option value="grilled">مشوي</option></select>
-                <select id="proteinType"><option value="none">نوع البروتين</option><option value="chicken">دجاج</option></select>
-            </div>
-            <button class="btn-primary" onclick="startCalculation()">احسب السعرات</button>
-            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
+            <input type="file" accept="image/*">
+            <button onclick="switchScreen('mainScreen')">رجوع</button>
         </div>
 
-        <!-- شاشة السجل -->
         <div id="historyScreen" class="screen">
-            <div id="historyContainer"></div>
-            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
+            <h4>سجل الوجبات</h4>
+            <div id="historyList"></div>
+            <button onclick="switchScreen('mainScreen')">رجوع</button>
         </div>
 
-        <!-- شاشة الماكروز -->
         <div id="macrosScreen" class="screen">
-            <input type="number" id="calc-weight" placeholder="الوزن (كج)">
-            <input type="number" id="calc-height" placeholder="الطول (سم)">
-            <button class="btn-primary" onclick="calculateMacros()">احسب النتيجة</button>
-            <h3 id="calc-result" style="text-align: center;"></h3>
-            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
+            <h4>حاسبة الاحتياج</h4>
+            <input type="number" id="weight" placeholder="الوزن (كجم)">
+            <button onclick="calculateMacros()">احسب</button>
+            <h4 id="result"></h4>
+            <button onclick="switchScreen('mainScreen')">رجوع</button>
         </div>
 
-        <!-- شاشة الإعدادات -->
-        <div id="settingsScreen" class="screen">
-            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
-        </div>
-
-        <!-- شاشة الحساب -->
         <div id="profileScreen" class="screen">
-            <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com" data-callback="handleGoogleLogin"></div>
+            <div id="g_id_onload" data-client_id="YOUR_ID" data-callback="handleGoogleLogin"></div>
             <div class="g_id_signin"></div>
-            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
+            <button onclick="switchScreen('mainScreen')">رجوع</button>
         </div>
     </div>
 
     <script>
-        function switchScreen(screenId) {
+        function switchScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
+            document.getElementById(id).classList.add('active');
         }
-        function toggleAdvanced() { document.getElementById('advancedOptions').style.display = document.getElementById('advancedToggle').checked ? 'block' : 'none'; }
-        // تم حذف دوال التمارين (generateWorkoutList, startInteractiveWorkout, الخ)
+
+        function changeLanguage() {
+            const lang = document.getElementById('langSelector').value;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+            // هنا يمكنك إضافة منطق ترجمة النصوص
+        }
+
+        function calculateMacros() {
+            const weight = document.getElementById('weight').value;
+            document.getElementById('result').innerText = "احتياجك التقديري: " + (weight * 30) + " سعرة";
+        }
+
+        function handleGoogleLogin(res) { console.log("تم تسجيل الدخول"); }
     </script>
 </body>
 </html>
