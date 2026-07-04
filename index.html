@@ -7,352 +7,266 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         :root {
-            /* ألوان مريحة للعين للوضع الفاتح */
-            --bg-color: #f4f7f6; 
-            --primary-color: #3182ce; 
-            --screen-bg: #ffffff;
-            --text-color: #2d3748;
-            --btn-text: #ffffff;
-            --border-color: #cbd5e1;
-            --advanced-bg: #f8fafc;
-            --extra-bg: #e2e8f0;
-            --section-title: #475569;
-            --card-shadow: 0 8px 25px rgba(0,0,0,0.06);
-            --success-color: #10b981;
+            --bg-color: #f4f7f6; --primary-color: #3182ce; --screen-bg: #ffffff;
+            --text-color: #2d3748; --btn-text: #ffffff; --border-color: #cbd5e1;
+            --advanced-bg: #f8fafc; --extra-bg: #e2e8f0; --section-title: #475569;
+            --card-shadow: 0 8px 25px rgba(0,0,0,0.06); --success-color: #10b981;
+            --calories-color: #ef4444;
         }
 
         body.dark-mode {
-            /* ألوان مريحة للوضع الليلي */
-            --bg-color: #121820 !important;
-            --screen-bg: #1e2632;
-            --text-color: #e2e8f0;
-            --border-color: #334155;
-            --advanced-bg: #171d26;
-            --extra-bg: #0f172a;
-            --section-title: #cbd5e1;
-            --card-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            --bg-color: #121820 !important; --screen-bg: #1e2632; --text-color: #e2e8f0;
+            --border-color: #334155; --advanced-bg: #171d26; --extra-bg: #0f172a;
+            --section-title: #cbd5e1; --card-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; transition: 0.3s; }
         
-        .app-header { background: var(--primary-color); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background 0.3s; }
+        .app-header { background: var(--primary-color); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .app-header h3 { margin: 0; font-size: 18px; font-weight: bold; flex-grow: 1; text-align: center; }
-        .profile-icon { font-size: 24px; cursor: pointer; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 50%; }
-        
         .header-actions { display: flex; gap: 12px; direction: ltr; }
-        .header-actions span { font-size: 22px; cursor: pointer; background: rgba(255,255,255,0.2); padding: 5px 8px; border-radius: 8px; transition: 0.2s; }
-        .header-actions span:active { transform: scale(0.9); }
+        .header-actions span { font-size: 22px; cursor: pointer; background: rgba(255,255,255,0.2); padding: 5px 8px; border-radius: 8px; }
 
         .app-container { padding: 20px; padding-bottom: 110px; } 
-        .screen { background: var(--screen-bg); max-width: 450px; margin: 0 auto; padding: 25px; border-radius: 20px; box-shadow: var(--card-shadow); display: none; transition: 0.3s; position: relative; }
+        .screen { background: var(--screen-bg); max-width: 450px; margin: 0 auto; padding: 25px; border-radius: 20px; box-shadow: var(--card-shadow); display: none; position: relative; }
         .active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; color: var(--btn-text); font-weight: bold; transition: transform 0.2s, background 0.3s; }
+        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; color: var(--btn-text); font-weight: bold; transition: 0.2s; }
         button:active { transform: scale(0.98); }
-        button:disabled { opacity: 0.7; cursor: not-allowed; }
-        
-        .btn-primary { background-color: var(--primary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .btn-back { background-color: #94a3b8; color: #fff; }
-        .btn-calc { background-color: var(--primary-color); }
-        .btn-workout { background-color: #f59e0b; color: #fff; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); } 
-        .btn-success { background-color: var(--success-color); color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); font-size: 18px;}
-
-        #offlineOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(18, 24, 32, 0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; padding: 20px; backdrop-filter: blur(5px); }
-        #offlineOverlay h1 { color: #ef4444; font-size: 50px; margin-bottom: 10px; }
-        #offlineOverlay p { font-size: 18px; line-height: 1.6; max-width: 300px; }
-
-        .fixed-bottom-ad { position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; background-color: var(--extra-bg); border-top: 2px solid var(--border-color); color: var(--section-title); display: flex; align-items: center; justify-content: center; padding: 12px; font-size: 13px; font-weight: bold; z-index: 999; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); }
-
-        .image-placeholder { position: relative; width: 100%; height: 220px; background-color: var(--extra-bg); border: 2px dashed var(--border-color); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; font-size: 45px; overflow: hidden; }
-        #previewImage { display: none; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        .btn-primary { background-color: var(--primary-color); }
+        .btn-back { background-color: #94a3b8; }
+        .btn-workout { background-color: #f59e0b; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); } 
+        .btn-success { background-color: var(--success-color); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); font-size: 18px;}
 
         .advanced-box { background: var(--advanced-bg); border: 1px solid var(--border-color); padding: 18px; border-radius: 15px; margin-top: 15px; }
         .section-title { font-weight: bold; margin-top: 15px; margin-bottom: 5px; color: var(--section-title); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0 15px 0; border: 1px solid var(--border-color); border-radius: 10px; box-sizing: border-box; background-color: var(--screen-bg); color: var(--text-color); font-size: 15px; outline: none; }
-        input:focus, select:focus { border-color: var(--primary-color); }
+        select, input { width: 100%; padding: 12px; margin: 8px 0 15px 0; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--screen-bg); color: var(--text-color); font-size: 15px; }
         
-        .checkbox-container { display: flex; align-items: center; justify-content: center; margin: 15px 0; font-weight: bold; color: var(--primary-color); background: var(--extra-bg); padding: 10px; border-radius: 10px; cursor: pointer; }
-        .checkbox-container input { width: 20px; height: 20px; margin-left: 10px; margin-right: 10px; cursor: pointer; }
-        
-        .flex-row { display: flex; gap: 10px; }
-        .flex-row > div { flex: 1; }
-        .error-card { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 12px; border-radius: 10px; margin-top: 15px; font-weight: bold; font-size: 14px; text-align: center; }
-        body.dark-mode .error-card { background-color: #451a03; color: #fcd34d; border-color: #78350f; }
-
-        /* ======== تصميمات قائمة التمارين (List View) ======== */
-        .workout-list-item { display: flex; align-items: center; background: var(--screen-bg); border-radius: 12px; margin-bottom: 12px; padding: 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .workout-img-box { width: 70px; height: 70px; background: var(--extra-bg); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 35px; margin-left: 15px; flex-shrink: 0; }
-        html[dir="ltr"] .workout-img-box { margin-left: 0; margin-right: 15px; }
+        .workout-list-item { display: flex; align-items: center; background: var(--screen-bg); border-radius: 12px; margin-bottom: 12px; padding: 12px; border: 1px solid var(--border-color); }
+        .workout-img-box { width: 70px; height: 70px; background: var(--extra-bg); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 35px; margin-left: 15px; flex-shrink: 0; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
         .workout-info { flex-grow: 1; text-align: right; }
-        html[dir="ltr"] .workout-info { text-align: left; }
-        .workout-title { font-weight: bold; font-size: 15px; color: var(--text-color); margin-bottom: 5px; line-height: 1.3; }
-        .workout-meta { font-size: 16px; color: var(--primary-color); font-weight: bold; }
+        .workout-title { font-weight: bold; font-size: 15px; margin-bottom: 5px; }
+        .workout-meta { font-size: 14px; color: var(--primary-color); font-weight: bold; }
+        .calories-badge { display: inline-block; background: #fee2e2; color: var(--calories-color); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; margin-bottom: 15px; text-align: center; width: 100%; box-sizing: border-box;}
+        body.dark-mode .calories-badge { background: #7f1d1d; color: #fca5a5; }
 
-        /* ======== تصميمات شاشة التدريب التفاعلي (Active Workout) ======== */
+        /* الشاشة التفاعلية */
         .progress-bar-container { width: 100%; height: 8px; background: var(--extra-bg); border-radius: 4px; margin-bottom: 25px; overflow: hidden; }
         .progress-bar { height: 100%; background: var(--success-color); width: 0%; transition: width 0.4s ease; }
-        .active-image-box { width: 100%; height: 200px; background: var(--extra-bg); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 100px; margin-bottom: 20px; box-shadow: inset 0 4px 10px rgba(0,0,0,0.05); }
-        .active-title { font-size: 22px; font-weight: bold; color: var(--text-color); text-align: center; margin-bottom: 10px; line-height: 1.4; }
-        .active-desc { font-size: 14px; color: #64748b; text-align: center; margin-bottom: 20px; line-height: 1.5; }
-        .active-value { font-size: 45px; font-weight: bold; color: var(--primary-color); text-align: center; margin-bottom: 30px; }
         
+        /* تأثير 3D لصورة التمرين */
+        .active-image-box { width: 100%; height: 220px; background: linear-gradient(145deg, var(--extra-bg), var(--screen-bg)); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 100px; margin-bottom: 20px; box-shadow:  10px 10px 20px rgba(0,0,0,0.1), -10px -10px 20px rgba(255,255,255,0.5); cursor: pointer; transition: transform 0.3s; position: relative; }
+        body.dark-mode .active-image-box { box-shadow:  10px 10px 20px rgba(0,0,0,0.3), -10px -10px 20px rgba(255,255,255,0.02); }
+        .active-image-box:active { transform: scale(0.95); }
+        .active-image-box::after { content: "👆 اضغط للتفاصيل"; position: absolute; bottom: 10px; font-size: 12px; background: rgba(0,0,0,0.5); color: white; padding: 4px 10px; border-radius: 10px; }
+
+        .active-title { font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 10px; }
+        .active-value { font-size: 45px; font-weight: bold; color: var(--primary-color); text-align: center; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+
+        /* نافذة تفاصيل العضلات */
+        #detailsModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--screen-bg); width: 85%; max-width: 400px; padding: 25px; border-radius: 20px; text-align: right; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+        .muscle-row { margin-bottom: 10px; }
+        .muscle-name { font-size: 14px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .muscle-bar-bg { width: 100%; height: 8px; background: var(--extra-bg); border-radius: 4px; overflow: hidden; }
+        .muscle-bar-fill { height: 100%; background: #ef4444; border-radius: 4px; }
+        .modal-close { background: var(--primary-color); margin-top: 20px; }
+
     </style>
 </head>
 <body>
 
-    <div id="offlineOverlay">
-        <h1>📶❌</h1>
-        <h2 data-i18n="offlineTitle">لا يوجد اتصال بالإنترنت</h2>
-        <p data-i18n="offlineDesc">التطبيق يعتمد على السيرفرات السحابية. يرجى الاتصال بالإنترنت للاستمرار.</p>
-    </div>
+    <!-- أصوات النظام -->
+    <!-- يمكنك استبدال الروابط بملفات صوتية حقيقية MP3 -->
+    <audio id="soundDone" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
+    <audio id="soundCheer" src="https://actions.google.com/sounds/v1/crowds/crowd_cheer.ogg" preload="auto"></audio>
 
     <div class="app-header">
-        <div class="profile-icon" onclick="switchScreen('profileScreen')" title="الحساب الشخصي">👤</div>
-        <h3 id="appTitle" data-i18n="appTitle">تطبيق اللياقة الذكي</h3>
+        <h3>تطبيق اللياقة الذكي</h3>
         <div class="header-actions">
-            <span onclick="toggleHeaderLanguage()" title="تغيير اللغة">🌐</span>
             <span onclick="switchScreen('settingsScreen')" title="الإعدادات">⚙️</span>
         </div>
     </div>
 
     <div class="app-container">
+        <!-- الشاشة الرئيسية -->
         <div id="mainScreen" class="screen active">
-            <button class="btn-workout" onclick="switchScreen('workoutsScreen')" data-i18n="menuWorkout">🏋️‍♂️ 1. التمارين الرياضية (AI)</button>
-            <button class="btn-primary" onclick="switchScreen('calcScreen')" data-i18n="menu1">📸 2. تصوير لحساب السعرات</button>
-            <button class="btn-primary" onclick="switchScreen('historyScreen')" data-i18n="menu2">📋 3. سجل الوجبات</button>
-            <button class="btn-primary" onclick="switchScreen('macrosScreen')" data-i18n="menuMacros" style="background-color: #38bdf8; color: #0f172a;">🧮 4. احسب احتياجك اليومي</button>
-            <button class="btn-primary" onclick="switchScreen('infoScreen')" data-i18n="menu4">📖 5. طريقة الاستخدام</button>
+            <button class="btn-workout" onclick="switchScreen('workoutsScreen')">🏋️‍♂️ 1. التمارين الرياضية (AI)</button>
+            <button class="btn-primary" onclick="switchScreen('settingsScreen')">🔔 2. إعدادات الإشعارات والصوت</button>
         </div>
 
+        <!-- شاشة التمارين الرياضية -->
         <div id="workoutsScreen" class="screen">
-            <h2 style="text-align: center;" data-i18n="workoutTitle">التمارين الرياضية 🏋️‍♂️</h2>
-            
-            <div id="workoutSettingsBox" class="advanced-box">
-                <label class="section-title" style="border:none; margin:0;" data-i18n="woGoalLabel">الهدف من التمرين:</label>
-                <select id="wo-goal" onchange="resetWorkoutResult()">
-                    <option value="bulk" data-i18n="woBulk">بناء عضلات (Bulk)</option>
-                    <option value="cut" data-i18n="woCut">تنشيف وحرق دهون (Cut)</option>
+            <h2 style="text-align: center;">التمارين الرياضية 🏋️‍♂️</h2>
+            <div class="advanced-box">
+                <label class="section-title" style="border:none; margin:0;">التركيز على:</label>
+                <select id="wo-muscle" onchange="resetWorkoutResult()">
+                    <option value="fullbody">جسم كامل (حرق عالي)</option>
+                    <option value="chest">عضلة الصدر</option>
+                    <option value="lower">الجزء السفلي (الأرجل)</option>
                 </select>
-
-                <label class="section-title" style="border:none; margin:0; margin-top:10px;" data-i18n="woPlaceLabel">مكان التمرين:</label>
-                <select id="wo-place" onchange="toggleGymOptions()">
-                    <option value="home" data-i18n="woHome">في المنزل (بدون أدوات)</option>
-                    <option value="gym" data-i18n="woGym">في الجيم (أو بأدوات)</option>
-                </select>
-
-                <div id="home-workout-options">
-                    <label class="section-title" style="border:none; margin:0; margin-top:10px;" data-i18n="woMuscleLabel">التركيز على:</label>
-                    <select id="wo-muscle" onchange="resetWorkoutResult()">
-                        <option value="fullbody" data-i18n="mFull">جسم كامل</option>
-                        <option value="chest" data-i18n="mChest">عضلة الصدر</option>
-                        <option value="arms" data-i18n="mArms">الذراعين</option>
-                        <option value="lower" data-i18n="mLower">الجزء السفلي (الأرجل)</option>
-                        <option value="back" data-i18n="mBack">الأكتاف والظهر</option>
-                    </select>
-
-                    <label class="section-title" style="border:none; margin:0; margin-top:10px;" data-i18n="woLevelLabel">المستوى:</label>
-                    <select id="wo-level" onchange="resetWorkoutResult()">
-                        <option value="beginner" data-i18n="lvlBeg">مبتدئ</option>
-                        <option value="intermediate" data-i18n="lvlInt">متوسط</option>
-                        <option value="advanced" data-i18n="lvlAdv">محترف</option>
-                    </select>
-                </div>
-
-                <div id="gym-coming-soon" class="error-card" style="display:none;" data-i18n="gymSoon">
-                    🚧 تمارين الجيم قريباً! يتم برمجتها حالياً. الرجاء اختيار التمارين المنزلية.
-                </div>
-
-                <button class="btn-workout" id="genWorkoutBtn" style="margin-top: 15px;" onclick="generateWorkoutList()" data-i18n="woGenBtn">تنظيم الجدول (AI)</button>
+                <button class="btn-workout" onclick="generateWorkoutList()">تنظيم الجدول (AI)</button>
             </div>
 
             <div id="workout-result-container" style="display: none; margin-top: 15px;">
-                <h3 style="text-align: center; color: var(--primary-color);" data-i18n="woResultTitle">جدولك المخصص 🔥</h3>
+                <div id="totalCaloriesBadge" class="calories-badge">🔥 الحرق المتوقع: 0 سعرة حرارية</div>
                 <div id="workout-list-html"></div>
-                <button class="btn-success" onclick="startInteractiveWorkout()" data-i18n="btnStartWorkout">🚀 ابدأ التدريب الآن</button>
+                <button class="btn-success" onclick="startInteractiveWorkout()">🚀 ابدأ التدريب الآن</button>
             </div>
-            
-            <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtnOnly" style="margin-top: 15px;">رجوع للرئيسية</button>
+            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع للرئيسية</button>
         </div>
 
+        <!-- شاشة التدريب التفاعلي -->
         <div id="activeWorkoutScreen" class="screen">
             <div class="progress-bar-container">
                 <div id="workoutProgress" class="progress-bar"></div>
             </div>
             
-            <div class="active-image-box" id="activeExImg">🏃‍♂️</div>
+            <div class="active-image-box" id="activeExImg" onclick="showExerciseDetails()">🏃‍♂️</div>
             
             <div class="active-title" id="activeExTitle">اسم التمرين</div>
-            <div class="active-desc" id="activeExDesc">شرح طريقة التمرين هنا لتوضيح الحركة المطلوبة.</div>
-            
             <div class="active-value" id="activeExValue">x 15</div>
             
-            <button class="btn-success" onclick="completeCurrentExercise()" data-i18n="btnNextEx">✔️ إتمام والانتقال للتالي</button>
-            <button class="btn-back" onclick="quitWorkout()" data-i18n="btnQuitEx">❌ إنهاء مبكر</button>
+            <button class="btn-success" onclick="completeCurrentExercise()">✔️ إتمام والانتقال للتالي</button>
+            <button class="btn-back" onclick="quitWorkout()">❌ إنهاء مبكر</button>
         </div>
 
+        <!-- شاشة الإعدادات والإشعارات -->
         <div id="settingsScreen" class="screen">
-            <h2 style="text-align: center;" data-i18n="settingsTitle">الإعدادات والمظهر</h2>
+            <h2 style="text-align: center;">الإعدادات والمظهر</h2>
             <div class="advanced-box">
-                <label class="section-title" style="border:none; margin:0;" data-i18n="langLabel">اللغة (Language):</label>
-                <select id="languageSelector" onchange="changeLanguage()">
-                    <option value="ar">العربية (Arabic)</option>
-                    <option value="en">English (الإنجليزية)</option>
-                </select>
-            </div>
-            <div class="advanced-box">
-                <label class="section-title" style="border:none; margin:0;" data-i18n="themeLabel">نمط العرض:</label>
+                <label class="section-title" style="border:none; margin:0;">نمط العرض:</label>
                 <select id="themeSelector" onchange="changeTheme()">
-                    <option value="system" data-i18n="themeSys">النظام التلقائي ⚙️</option>
-                    <option value="light" data-i18n="themeLight">الوضع الفاتح ☀️</option>
-                    <option value="dark" data-i18n="themeDark">الوضع الداكن 🌙</option>
+                    <option value="light">الوضع الفاتح ☀️</option>
+                    <option value="dark">الوضع الداكن 🌙</option>
                 </select>
             </div>
-            <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtnOnly">رجوع</button>
-        </div>
-
-        <div id="calcScreen" class="screen">
-            <h2 style="text-align: center;" data-i18n="calcTitle">تحليل الوجبة</h2>
-            <div id="imageBox" class="image-placeholder"><span id="imageIcon">📸</span><img id="previewImage" src="" alt="Meal Preview"></div>
-            <label class="btn-primary" style="display: block; text-align: center; cursor: pointer; border-radius: 12px; padding: 15px; color: white; font-weight: bold; margin-bottom: 10px;">
-                <span data-i18n="captureBtn">التقط أو ارفع صورة 📸</span>
-                <input type="file" id="mealImage" accept="image/*" style="display: none;">
-            </label>
-            <button id="calcBtn" class="btn-calc" onclick="startCalculation()" data-i18n="calcNowBtn">احسب السعرات الآن 🔥</button>
-            <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtnOnly">رجوع</button>
-        </div>
-
-        <div id="macrosScreen" class="screen">
-            <h2 style="text-align: center;" data-i18n="macrosTitle">احسب احتياجك 🧮</h2>
             <div class="advanced-box">
-                <div class="flex-row">
-                    <div><input type="number" id="calc-weight" placeholder="الوزن (كج)" data-i18n-placeholder="weightPla"></div>
-                    <div><input type="number" id="calc-height" placeholder="الطول (سم)" data-i18n-placeholder="heightPla"></div>
-                </div>
-                <button class="btn-primary" style="background-color: #38bdf8; color: #0f172a;" onclick="calculateMacros()" data-i18n="calcBtnMacros">احسب النتيجة</button>
-                <div style="text-align: center; margin-top: 15px;"><h3 id="calc-result" style="color: var(--success-color); margin: 0;"></h3></div>
+                <label class="section-title" style="border:none; margin:0;">الإشعارات والتذكير 🔔:</label>
+                <button class="btn-primary" onclick="enableNotifications()">تفعيل تذكير شرب الماء والتمارين</button>
+                <p id="notifStatus" style="font-size: 12px; color: var(--success-color); text-align: center; display: none;">✅ الإشعارات مفعلة بنجاح!</p>
             </div>
-            <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtnOnly" style="margin-top: 15px;">رجوع</button>
-        </div>
-
-        <div id="infoScreen" class="screen">
-            <h2 style="text-align: center;" data-i18n="infoTitle">طريقة الاستخدام</h2>
-            <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtnOnly">رجوع</button>
-        </div>
-        
-        <div id="historyScreen" class="screen">
-            <h2 style="text-align: center;" data-i18n="histTitle">سجل الوجبات</h2>
-            <button class="btn-back" onclick="switchScreen('mainScreen')" style="margin-top: 15px;" data-i18n="backBtnOnly">رجوع</button>
-        </div>
-        <div id="profileScreen" class="screen">
-            <h2 style="text-align: center;" data-i18n="profTitle">الحساب الشخصي</h2>
-            <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtnOnly">رجوع</button>
+            <button class="btn-back" onclick="switchScreen('mainScreen')">رجوع</button>
         </div>
     </div>
 
-    <div class="fixed-bottom-ad" data-i18n="adSpace">مساحة إعلانية (Google AdSense Banner)</div>
+    <!-- نافذة تفاصيل التمرين (Modal) -->
+    <div id="detailsModal">
+        <div class="modal-content">
+            <h3 id="modalTitle" style="color: var(--primary-color); margin-top: 0;">اسم التمرين</h3>
+            <p id="modalDesc" style="font-size: 14px; color: var(--section-title);">وصف الفوائد هنا...</p>
+            <h4 style="margin-bottom: 10px;">🎯 العضلات المستهدفة:</h4>
+            <div id="modalMuscles">
+                <!-- أشرطة العضلات ستتم إضافتها هنا برمجياً -->
+            </div>
+            <button class="modal-close" onclick="closeExerciseDetails()">حسناً، فهمت</button>
+        </div>
+    </div>
 
     <script>
-        // --- 1. الترجمة والنصوص ---
-        const i18n = {
-            ar: {
-                appTitle: "تطبيق اللياقة الذكي", 
-                menuWorkout: "🏋️‍♂️ 1. التمارين الرياضية (AI)", menu1: "📸 2. تصوير لحساب السعرات", menu2: "📋 3. سجل الوجبات", menuMacros: "🧮 4. احسب احتياجك اليومي", menu4: "📖 5. طريقة الاستخدام",
-                workoutTitle: "التمارين الرياضية 🏋️‍♂️", woGoalLabel: "الهدف من التمرين:", woBulk: "بناء عضلات (Bulk)", woCut: "تنشيف وحرق دهون (Cut)", woPlaceLabel: "مكان التمرين:", woHome: "في المنزل (بدون أدوات)", woGym: "في الجيم (أو بأدوات)", woMuscleLabel: "التركيز على:", mFull: "جسم كامل", mChest: "عضلة الصدر", mArms: "الذراعين", mLower: "الجزء السفلي (الأرجل)", mBack: "الأكتاف والظهر", woLevelLabel: "المستوى:", lvlBeg: "مبتدئ", lvlInt: "متوسط", lvlAdv: "محترف", gymSoon: "🚧 تمارين الجيم قريباً! الرجاء اختيار التمارين المنزلية.", woGenBtn: "تنظيم الجدول (AI)", woResultTitle: "جدولك المخصص 🔥",
-                btnStartWorkout: "🚀 ابدأ التدريب الآن", btnNextEx: "✔️ إتمام والانتقال للتالي", btnQuitEx: "❌ إنهاء مبكر", txtReps: "x", txtSec: "ثانية",
-                settingsTitle: "الإعدادات والمظهر", langLabel: "اللغة:", themeLabel: "نمط العرض:", themeSys: "تلقائي", themeLight: "فاتح", themeDark: "داكن", backBtnOnly: "رجوع", calcTitle: "تحليل الوجبة", captureBtn: "التقط صورة", calcNowBtn: "احسب", macrosTitle: "الاحتياج", weightPla: "الوزن", heightPla: "الطول", calcBtnMacros: "احسب", infoTitle: "الاستخدام", histTitle: "السجل", profTitle: "الحساب", adSpace: "إعلان", offlineTitle: "لا اتصال", offlineDesc: "اتصل بالإنترنت."
-            },
-            en: {
-                appTitle: "Smart Fitness", 
-                menuWorkout: "🏋️‍♂️ 1. Workouts (AI)", menu1: "📸 2. Snap Meal", menu2: "📋 3. History", menuMacros: "🧮 4. Daily Needs", menu4: "📖 5. How to Use",
-                workoutTitle: "Workouts 🏋️‍♂️", woGoalLabel: "Goal:", woBulk: "Bulk (Muscle)", woCut: "Cut (Fat Loss)", woPlaceLabel: "Location:", woHome: "Home (No Equip)", woGym: "Gym (With Equip)", woMuscleLabel: "Target:", mFull: "Full Body", mChest: "Chest", mArms: "Arms", mLower: "Legs", mBack: "Back", woLevelLabel: "Level:", lvlBeg: "Beginner", lvlInt: "Intermediate", lvlAdv: "Advanced", gymSoon: "🚧 Gym coming soon! Select Home.", woGenBtn: "Generate Routine", woResultTitle: "Your Routine 🔥",
-                btnStartWorkout: "🚀 Start Workout", btnNextEx: "✔️ Done & Next", btnQuitEx: "❌ Quit", txtReps: "x", txtSec: "sec",
-                settingsTitle: "Settings", langLabel: "Lang:", themeLabel: "Theme:", themeSys: "Auto", themeLight: "Light", themeDark: "Dark", backBtnOnly: "Back", calcTitle: "Meal Analysis", captureBtn: "Take Photo", calcNowBtn: "Calc", macrosTitle: "Macros", weightPla: "Weight", heightPla: "Height", calcBtnMacros: "Calculate", infoTitle: "Info", histTitle: "History", profTitle: "Profile", adSpace: "Ad Banner", offlineTitle: "Offline", offlineDesc: "Connect to internet."
-            }
-        };
-
-        // --- 2. قاعدة بيانات التمارين المحدثة (الصور، النوع: وقت/عدات) ---
+        // --- 1. قاعدة بيانات التمارين الشاملة (تشمل السعرات والعضلات) ---
         const dbWorkouts = {
-            fullbody: {
-                beginner: [
-                    { ar: { n: "قفز مع فتح القدمين", d: "تمرين هوائي لتسخين الجسم وتحريك كافة العضلات." }, en: { n: "Jumping Jacks", d: "Cardio warmup." }, type: "time", base: 30, img: "🏃‍♂️" },
-                    { ar: { n: "سكوات بوزن الجسم", d: "انزل ببطء كأنك تجلس على كرسي ثم قف." }, en: { n: "Squats", d: "Sit back and stand up." }, type: "reps", base: 12, img: "🦵" },
-                    { ar: { n: "بلانك", d: "ارتكز على ساعديك وأصابع قدميك واثبت." }, en: { n: "Plank", d: "Hold position on forearms." }, type: "time", base: 20, img: "🧘‍♂️" }
-                ],
-                intermediate: [
-                    { ar: { n: "تسلق الجبال", d: "في وضع الضغط، قرب ركبتيك لصدرك بسرعة." }, en: { n: "Mountain Climbers", d: "Bring knees to chest in plank." }, type: "time", base: 40, img: "🧗‍♂️" },
-                    { ar: { n: "بيربي مبسط", d: "انزل للأرض، ارجع قدميك للخلف ثم عد وقف." }, en: { n: "Half Burpees", d: "No pushup burpees." }, type: "reps", base: 15, img: "🤸‍♂️" }
-                ],
-                advanced: [
-                    { ar: { n: "بيربي كامل", d: "تمرين البيربي مع ضغط وقفزة عالية." }, en: { n: "Full Burpees", d: "With pushup and jump." }, type: "reps", base: 15, img: "🔥" },
-                    { ar: { n: "سكوات قفز", d: "سكوات مع قفزة قوية لأعلى." }, en: { n: "Jump Squats", d: "Squat and jump." }, type: "reps", base: 20, img: "🚀" }
-                ]
-            },
-            chest: {
-                beginner: [
-                    { ar: { n: "ضغط على الركب", d: "تمرين ضغط مع ارتكاز الركبتين على الأرض." }, en: { n: "Knee Push-ups", d: "Push-ups on knees." }, type: "reps", base: 10, img: "💪" },
-                    { ar: { n: "ضغط حائط", d: "قف أمام حائط وادفع نفسك." }, en: { n: "Wall Push-ups", d: "Push against wall." }, type: "reps", base: 15, img: "🧱" }
-                ]
-            },
-            // تم اختصار باقي العضلات لتبسيط الكود للمثال (ستعمل جميع الخيارات بفضل الدالة الشرطية)
+            fullbody: [
+                { n: "قفز مع فتح القدمين (Jumping Jacks)", d: "تمرين ممتاز لتسخين الجسم، يرفع معدل نبضات القلب وينشط الدورة الدموية.", type: "time", base: 60, calPerUnit: 0.2, img: "🏃‍♂️", muscles: {"القلب (كارديو)": 50, "السمانة": 30, "الأكتاف": 20} },
+                { n: "سكوات بوزن الجسم", d: "يقوي الجزء السفلي بالكامل ويحسن توازن الجسم ومرونة المفاصل.", type: "reps", base: 25, calPerUnit: 1.5, img: "🦵", muscles: {"الفخذ الأمامي": 50, "عضلات المؤخرة": 30, "الفخذ الخلفي": 20} },
+                { n: "بيربي كامل (Burpees)", d: "تمرين شامل وحارق جبار للدهون، يدمج بين القوة والكارديو.", type: "reps", base: 15, calPerUnit: 2.5, img: "🔥", muscles: {"القلب (كارديو)": 40, "الصدر": 30, "الأرجل": 30} },
+                { n: "تسلق الجبال (Mountain Climbers)", d: "يستهدف عضلات البطن الأساسية ويحرق دهون الخصر بفعالية.", type: "time", base: 60, calPerUnit: 0.25, img: "🧗‍♂️", muscles: {"البطن (Core)": 50, "الأكتاف": 30, "القلب (كارديو)": 20} }
+            ],
+            chest: [
+                { n: "تمرين الضغط (Push-ups)", d: "التمرين الأساسي لبناء عضلة الصدر وتقوية الذراعين بدون أوزان.", type: "reps", base: 20, calPerUnit: 1.2, img: "💪", muscles: {"الصدر": 60, "الترايسبس": 25, "الكتف الأمامي": 15} },
+                { n: "بلانك (Plank)", d: "تمرين ثبات جبار لتقوية الجذع وحماية العمود الفقري.", type: "time", base: 60, calPerUnit: 0.1, img: "🧘‍♂️", muscles: {"البطن (Core)": 70, "الأكتاف": 20, "أسفل الظهر": 10} }
+            ],
+            lower: [
+                { n: "الطعنات (Lunges)", d: "يعزل عضلات الأرجل ويركز على تناسق العضلات وشد الترهلات.", type: "reps", base: 20, calPerUnit: 1.5, img: "🚶‍♂️", muscles: {"الفخذ الأمامي": 40, "المؤخرة": 40, "السمانة": 20} }
+            ]
         };
 
-        // --- 3. متغيرات التدريب التفاعلي ---
         let currentWorkoutPlan = [];
         let currentExerciseIndex = 0;
+        let halfwayAnnounced = false; // لمنع تكرار نطق المنتصف
 
+        // --- التبديل بين الشاشات ---
         function switchScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
         }
 
-        // --- 4. إعداد القائمة عند الضغط على زر "تنظيم الجدول" ---
-        function generateWorkoutList() {
-            const lang = document.documentElement.lang || 'ar';
-            const goal = document.getElementById('wo-goal').value;
-            let muscle = document.getElementById('wo-muscle').value;
-            let level = document.getElementById('wo-level').value;
+        // --- الثيم (مظلم/فاتح) ---
+        function changeTheme() { 
+            const theme = document.getElementById('themeSelector').value;
+            if (theme === 'dark') document.body.classList.add('dark-mode');
+            else document.body.classList.remove('dark-mode');
+        }
 
-            // حماية في حال لم أكتب كل الفروع في الـ db المختصر
-            if(!dbWorkouts[muscle] || !dbWorkouts[muscle][level]) {
-                muscle = 'fullbody'; level = 'beginner'; 
+        // --- المساعد الصوتي (Text to Speech) ---
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                // إيقاف أي نطق سابق
+                window.speechSynthesis.cancel();
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.lang = 'ar-SA'; // نطق عربي
+                msg.rate = 0.9; // سرعة النطق
+                window.speechSynthesis.speak(msg);
             }
+        }
+
+        // --- نظام الإشعارات (Notifications) ---
+        function enableNotifications() {
+            if (!("Notification" in window)) {
+                alert("متصفحك لا يدعم الإشعارات.");
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    document.getElementById('notifStatus').style.display = 'block';
+                    new Notification("تطبيق اللياقة الذكي 🏋️‍♂️", { body: "تم تفعيل التذكيرات! سنقوم بتذكيرك بشرب الماء كل ساعتين." });
+                    
+                    // مثال لتذكير شرب الماء (يتم تشغيله كل ساعتين نظرياً - وضعنا دقيقة للتجربة إذا أردت)
+                    setInterval(() => {
+                        new Notification("💧 وقت شرب الماء!", { body: "حافظ على رطوبة جسمك، اشرب كوباً من الماء الآن." });
+                    }, 1000 * 60 * 120); // 120 دقيقة
+                } else {
+                    alert("يرجى السماح للإشعارات من إعدادات المتصفح ليعمل التذكير.");
+                }
+            });
+        }
+
+        // --- تكوين الجدول بحرق > 250 سعرة ---
+        function generateWorkoutList() {
+            const muscle = document.getElementById('wo-muscle').value;
+            let baseExercises = dbWorkouts[muscle] || dbWorkouts['fullbody'];
             
-            const exercises = dbWorkouts[muscle][level];
-            currentWorkoutPlan = []; // تصفير الجدول الحالي
+            currentWorkoutPlan = [];
+            let totalCalories = 0;
+            let rounds = 0;
+
+            // نكرر التمارين كجولات (Circuits) حتى نتجاوز 250 سعرة حرارية
+            while (totalCalories < 260 && rounds < 10) { // حد أقصى 10 جولات للحماية
+                baseExercises.forEach(ex => {
+                    let exCal = ex.base * ex.calPerUnit;
+                    totalCalories += exCal;
+                    
+                    currentWorkoutPlan.push({
+                        name: ex.n, desc: ex.d, type: ex.type,
+                        value: ex.base, img: ex.img, muscles: ex.muscles
+                    });
+                });
+                rounds++;
+            }
 
             const listContainer = document.getElementById('workout-list-html');
             listContainer.innerHTML = '';
 
-            const txtReps = i18n[lang].txtReps;
-            const txtSec = i18n[lang].txtSec;
+            document.getElementById('totalCaloriesBadge').innerText = `🔥 الحرق المتوقع: ${Math.floor(totalCalories)} سعرة حرارية (${rounds} جولات)`;
 
-            exercises.forEach((ex, index) => {
-                // تعديل القيمة بناء على الهدف (البناء = عدات أقل / التنشيف = عدات أكثر)
-                let val = ex.base;
-                if (ex.type === 'reps') {
-                    val = goal === 'bulk' ? val : val + 5; 
-                } else { // time
-                    val = goal === 'bulk' ? val : val + 15; 
-                }
-
-                // حفظ في المصفوفة للمرحلة التفاعلية
-                currentWorkoutPlan.push({
-                    name: ex[lang].n,
-                    desc: ex[lang].d,
-                    type: ex.type,
-                    value: val,
-                    img: ex.img
-                });
-
-                // رسم العنصر في القائمة
-                let displayValue = ex.type === 'reps' ? `${txtReps} ${val}` : `00:${val} ${txtSec}`;
-                
+            currentWorkoutPlan.forEach(ex => {
+                let displayValue = ex.type === 'reps' ? `x ${ex.value} عدة` : `⏱️ ${ex.value} ثانية`;
                 listContainer.innerHTML += `
                     <div class="workout-list-item">
                         <div class="workout-img-box">${ex.img}</div>
                         <div class="workout-info">
-                            <div class="workout-title">${ex[lang].n}</div>
+                            <div class="workout-title">${ex.name}</div>
                             <div class="workout-meta">${displayValue}</div>
                         </div>
                     </div>
@@ -362,106 +276,95 @@
             document.getElementById('workout-result-container').style.display = 'block';
         }
 
-        // --- 5. منطق التدريب التفاعلي (الخطوة بخطوة) ---
+        function resetWorkoutResult() { document.getElementById('workout-result-container').style.display = 'none'; }
+
+        // --- بدء التمارين ---
         function startInteractiveWorkout() {
             if(currentWorkoutPlan.length === 0) return;
             currentExerciseIndex = 0;
+            halfwayAnnounced = false;
             switchScreen('activeWorkoutScreen');
             renderCurrentExercise();
         }
 
         function renderCurrentExercise() {
-            const lang = document.documentElement.lang || 'ar';
             const ex = currentWorkoutPlan[currentExerciseIndex];
             
             // تحديث الشريط
             const progressPercent = (currentExerciseIndex / currentWorkoutPlan.length) * 100;
             document.getElementById('workoutProgress').style.width = `${progressPercent}%`;
 
-            // تحديث البيانات
+            // تحديث الشاشة
             document.getElementById('activeExImg').innerText = ex.img;
             document.getElementById('activeExTitle').innerText = ex.name;
-            document.getElementById('activeExDesc').innerText = ex.desc;
-
-            const txtReps = i18n[lang].txtReps;
-            const txtSec = i18n[lang].txtSec;
             
-            if(ex.type === 'reps') {
-                document.getElementById('activeExValue').innerText = `${txtReps} ${ex.value}`;
-            } else {
-                document.getElementById('activeExValue').innerText = `⏱️ ${ex.value} ${txtSec}`;
+            let valueText = ex.type === 'reps' ? `${ex.value} عدة` : `${ex.value} ثانية`;
+            document.getElementById('activeExValue').innerText = valueText;
+
+            // نطق اسم التمرين والعدد
+            speakText(`التمرين التالي: ${ex.name}، ${valueText}.`);
+
+            // فحص الوصول للمنتصف
+            if (!halfwayAnnounced && currentExerciseIndex === Math.floor(currentWorkoutPlan.length / 2) && currentExerciseIndex > 0) {
+                setTimeout(() => { speakText("أحسنت! لقد وصلت لمنتصف التدريب، استمر يا بطل"); }, 3000);
+                halfwayAnnounced = true;
             }
         }
 
+        // --- إنهاء التمرين الحالي ---
         function completeCurrentExercise() {
+            // تشغيل صوت تشجيعي صغير
+            document.getElementById('soundDone').play().catch(e => {});
+
             currentExerciseIndex++;
             if (currentExerciseIndex >= currentWorkoutPlan.length) {
                 // اكتمل التدريب
                 document.getElementById('workoutProgress').style.width = '100%';
+                document.getElementById('soundCheer').play().catch(e => {});
+                speakText("مبروك! لقد أنهيت التدريب بنجاح، وحرقت أكثر من مئتين وخمسين سعرة حرارية، أنت بطل حقيقي.");
+                
                 setTimeout(() => {
-                    alert((document.documentElement.lang === 'en') ? "🎉 Workout Complete! Great job!" : "🎉 تم إنجاز التدريب بنجاح! بطل!");
+                    alert("🎉 تم إنجاز التدريب بنجاح! بطل!");
                     switchScreen('workoutsScreen');
-                }, 300);
+                }, 1000);
             } else {
                 renderCurrentExercise();
             }
         }
 
         function quitWorkout() {
-            if(confirm((document.documentElement.lang === 'en') ? "Quit workout?" : "هل أنت متأكد أنك تريد إنهاء التدريب مبكراً؟")) {
+            if(confirm("هل أنت متأكد أنك تريد إنهاء التدريب مبكراً؟")) {
+                window.speechSynthesis.cancel();
                 switchScreen('workoutsScreen');
             }
         }
 
-        // دوال مساعدة لضمان عمل الواجهة
-        function resetWorkoutResult() { document.getElementById('workout-result-container').style.display = 'none'; }
-        function toggleGymOptions() {
-            const place = document.getElementById('wo-place').value;
-            if (place === 'gym') {
-                document.getElementById('home-workout-options').style.display = 'none';
-                document.getElementById('gym-coming-soon').style.display = 'block';
-                document.getElementById('genWorkoutBtn').disabled = true;
-                resetWorkoutResult();
-            } else {
-                document.getElementById('home-workout-options').style.display = 'block';
-                document.getElementById('gym-coming-soon').style.display = 'none';
-                document.getElementById('genWorkoutBtn').disabled = false;
+        // --- تفاصيل التمرين (Modal - 3D Click) ---
+        function showExerciseDetails() {
+            const ex = currentWorkoutPlan[currentExerciseIndex];
+            document.getElementById('modalTitle').innerText = ex.name;
+            document.getElementById('modalDesc').innerText = ex.desc;
+            
+            const musclesContainer = document.getElementById('modalMuscles');
+            musclesContainer.innerHTML = '';
+            
+            // رسم أشرطة العضلات بنسب مئوية
+            for (const [muscleName, percentage] of Object.entries(ex.muscles)) {
+                musclesContainer.innerHTML += `
+                    <div class="muscle-row">
+                        <div class="muscle-name"><span>${muscleName}</span> <span>${percentage}%</span></div>
+                        <div class="muscle-bar-bg"><div class="muscle-bar-fill" style="width: ${percentage}%;"></div></div>
+                    </div>
+                `;
             }
+            
+            document.getElementById('detailsModal').style.display = 'flex';
         }
 
-        // إعدادات اللغة والثيم (من الكود السابق)
-        function toggleHeaderLanguage() {
-            let currentLang = localStorage.getItem('appLang') || 'ar';
-            let newLang = currentLang === 'ar' ? 'en' : 'ar';
-            localStorage.setItem('appLang', newLang);
-            applyLanguage(newLang);
+        function closeExerciseDetails() {
+            document.getElementById('detailsModal').style.display = 'none';
         }
-        function changeLanguage() {
-            const lang = document.getElementById('languageSelector').value;
-            localStorage.setItem('appLang', lang);
-            applyLanguage(lang);
-        }
-        function applyLanguage(lang) {
-            document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
-            document.documentElement.lang = lang;
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if(i18n[lang] && i18n[lang][key]) el.innerText = i18n[lang][key];
-            });
-            if(document.getElementById('languageSelector')) document.getElementById('languageSelector').value = lang;
-            if(currentWorkoutPlan.length === 0) resetWorkoutResult();
-        }
-        function changeTheme() { 
-            const theme = document.getElementById('themeSelector').value;
-            if (theme === 'dark') document.body.classList.add('dark-mode');
-            else document.body.classList.remove('dark-mode');
-        }
-        window.onload = function() { applyLanguage(localStorage.getItem('appLang') || 'ar'); changeTheme(); };
-        function startCalculation() { alert("تم ضغط زر التحليل"); }
-        function calculateMacros() {
-            const w = document.getElementById('calc-weight').value;
-            if(w) document.getElementById('calc-result').innerText = "تم حساب الماكروز!";
-        }
+
     </script>
 </body>
 </html>
