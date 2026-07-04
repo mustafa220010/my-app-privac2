@@ -270,4 +270,691 @@
         <div id="historyScreen" class="screen">
             <h2 style="text-align: center;" data-i18n="histTitle">سجل الوجبات</h2>
             <div style="text-align: left; margin-bottom: 10px;" id="clearHistoryDiv">
-                <button onclick="clearHistory()" style="width: auto; padding: 5px 10px; background: transparent;
+                <button onclick="clearHistory()" style="width: auto; padding: 5px 10px; background: transparent; color: #ef4444; border: 1px solid #ef4444; margin: 0; border-radius: 8px;" data-i18n="clearHistBtn">🗑️ مسح السجل</button>
+            </div>
+            <div id="historyContainer" class="history-card" style="max-height: 350px; overflow-y: auto;"></div>
+            <button class="btn-back" onclick="switchScreen('mainScreen')" style="margin-top: 15px;" data-i18n="backBtnOnly">رجوع</button>
+        </div>
+
+        <div id="macrosScreen" class="screen">
+            <h2 style="text-align: center;" data-i18n="macrosTitle">احسب احتياجك 🧮</h2>
+            <div class="advanced-box">
+                <label class="section-title" style="border:none; margin:0;" data-i18n="goalLabel">الهدف من النظام:</label>
+                <select id="goal-select">
+                    <option value="cut" data-i18n="goalCut">تنشيف (خسارة دهون)</option>
+                    <option value="bulk" data-i18n="goalBulk">تضخيم (بناء عضل)</option>
+                </select>
+
+                <label class="section-title" style="border:none; margin:0; margin-top:10px;" data-i18n="calcWhatLabel">ماذا تريد أن تحسب؟</label>
+                <select id="calc-type-select">
+                    <option value="calories" data-i18n="calcCal">السعرات الحرارية اليومية</option>
+                    <option value="protein" data-i18n="calcProt">احتياجك من البروتين</option>
+                    <option value="carbs" data-i18n="calcCarb">احتياجك من الكربوهيدرات</option>
+                </select>
+
+                <div class="flex-row" style="margin-top: 15px;">
+                    <div><input type="number" id="calc-weight" placeholder="الوزن (كج)" data-i18n-placeholder="weightPla" required></div>
+                    <div><input type="number" id="calc-height" placeholder="الطول (سم)" data-i18n-placeholder="heightPla" required></div>
+                </div>
+                <div class="flex-row">
+                    <div><input type="number" id="calc-age" placeholder="العمر" data-i18n-placeholder="agePla" required></div>
+                    <div>
+                        <select id="calc-gender">
+                            <option value="male" data-i18n="genderMale">ذكر</option>
+                            <option value="female" data-i18n="genderFemale">أنثى</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn-primary" style="background-color: #38bdf8; color: #0f172a; margin-top: 15px;" onclick="calculateMacros()" data-i18n="calcBtnMacros">احسب النتيجة</button>
+                <div style="text-align: center; margin-top: 15px;"><h3 id="calc-result" style="color: #10b981; font-weight: bold; margin: 0;"></h3></div>
+            </div>
+            <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtnOnly" style="margin-top: 15px;">رجوع</button>
+        </div>
+
+        <div id="settingsScreen" class="screen">
+            <h2 style="text-align: center;" data-i18n="settingsTitle">الإعدادات والمظهر</h2>
+            <div class="advanced-box">
+                <label class="section-title" style="border:none; margin:0;" data-i18n="langLabel">اللغة (Language):</label>
+                <select id="languageSelector" onchange="changeLanguage()">
+                    <option value="ar">العربية (Arabic)</option>
+                    <option value="en">English (الإنجليزية)</option>
+                </select>
+            </div>
+            <div class="advanced-box">
+                <label class="section-title" style="border:none; margin:0;" data-i18n="themeLabel">نمط العرض:</label>
+                <select id="themeSelector" onchange="changeTheme()">
+                    <option value="system" data-i18n="themeSys">النظام التلقائي ⚙️</option>
+                    <option value="light" data-i18n="themeLight">الوضع الفاتح ☀️</option>
+                    <option value="dark" data-i18n="themeDark">الوضع الداكن 🌙</option>
+                </select>
+            </div>
+            <div class="advanced-box">
+                <label class="section-title" style="border:none; margin:0;" data-i18n="colorLabel">اللون الأساسي:</label>
+                <select id="primaryColorSelector" onchange="changeColors()">
+                    <option value="#3182ce" data-i18n="colorBlue">أزرق محيطي</option>
+                    <option value="#10b981" data-i18n="colorGreen">أخضر صحي</option>
+                    <option value="#ef4444" data-i18n="colorRed">أحمر نشط</option>
+                </select>
+            </div>
+            <div class="advanced-box">
+                <label class="section-title" style="border:none; margin:0;" data-i18n="notifLabel">الإشعارات والتذكير 🔔:</label>
+                <button class="btn-primary" onclick="enableNotifications()" data-i18n="btnNotif">تفعيل تذكير شرب الماء والتمارين</button>
+                <p id="notifStatus" style="font-size: 12px; color: var(--success-color); text-align: center; display: none;" data-i18n="notifActive">✅ الإشعارات مفعلة بنجاح!</p>
+            </div>
+            <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtn">⬅️ رجوع للرئيسية</button>
+        </div>
+
+        <div id="profileScreen" class="screen">
+            <h2 style="text-align: center;" data-i18n="profTitle">الحساب الشخصي</h2>
+            <div id="loginSection" style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;">
+                <p style="text-align: center; font-size: 14px; color: gray;" data-i18n="loginDesc">سجل الدخول لحفظ بياناتك سحابياً</p>
+                <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleGoogleLogin" data-auto_select="false"></div>
+                <div class="g_id_signin" data-type="standard" data-shape="skewed" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+            </div>
+            <div id="userDataSection" style="display:none;" class="advanced-box">
+                <p style="text-align: center; color: #10b981; font-weight: bold;" id="googleUserTxt">✅ متصل</p>
+                <button class="btn-remove" onclick="logoutGoogle()" style="width: 100%;" data-i18n="logoutBtn">تسجيل الخروج</button>
+            </div>
+            <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtnOnly">رجوع</button>
+        </div>
+
+        <div id="infoScreen" class="screen">
+            <h2 style="text-align: center;" data-i18n="infoTitle">طريقة الاستخدام</h2>
+            <div class="advanced-box" style="line-height: 1.8;">
+                <p data-i18n="info1">1. التقط صورة للوجبة للحصول على تقدير آلي للسعرات.</p>
+                <p data-i18n="info2">2. استخدم الخيارات المتقدمة لدقة أعلى.</p>
+                <p data-i18n="info3">3. تم إضافة قسم التمارين المدعوم بالذكاء الاصطناعي مع التدريب التفاعلي والتذكير الصوتي.</p>
+            </div>
+            <button class="btn-back" onclick="switchScreen('mainScreen')" data-i18n="backBtnOnly">رجوع</button>
+        </div>
+    </div>
+
+    <div id="detailsModal">
+        <div class="modal-content" style="text-align: right;" id="modalContentInner">
+            <h3 id="modalTitle" style="color: var(--primary-color); margin-top: 0;">اسم التمرين</h3>
+            <p id="modalDesc" style="font-size: 14px; color: var(--section-title);">وصف الفوائد هنا...</p>
+            <h4 style="margin-bottom: 10px;" id="modalTargetText">🎯 العضلات المستهدفة:</h4>
+            <div id="modalMuscles">
+                </div>
+            <button class="btn-primary" style="margin-top: 20px;" onclick="closeExerciseDetails()" id="modalCloseBtn">حسناً، فهمت</button>
+        </div>
+    </div>
+
+    <div class="fixed-bottom-ad" data-i18n="adSpace">مساحة إعلانية (Google AdSense Banner)</div>
+
+    <script>
+        // --- 1. القاموس والترجمة الشاملة لجميع الشاشات القديمة والجديدة ---
+        const i18n = {
+            ar: {
+                appTitle: "تطبيق اللياقة الذكي", offlineTitle: "لا يوجد اتصال", offlineDesc: "يرجى الاتصال بالإنترنت للاستمرار.",
+                menuWorkout: "🏋️‍♂️ 1. التمارين الرياضية (AI)", menu1: "📸 2. تصوير لحساب السعرات", menu2: "📋 3. سجل الوجبات", menuMacros: "🧮 4. احسب احتياجك اليومي", menu4: "📖 5. طريقة الاستخدام",
+                
+                workoutTitle: "التمارين الرياضية 🏋️‍♂️", woGoalLabel: "الهدف من التمرين:", woBulk: "بناء عضلات (Bulk)", woCut: "تنشيف وحرق دهون (Cut)", woPlaceLabel: "مكان التمرين:", woHome: "في المنزل (بدون أدوات)", woGym: "في الجيم (أو بأدوات)", woMuscleLabel: "التركيز على:", mFull: "جسم كامل (حرق عالي)", mChest: "عضلة الصدر", mArms: "الذراعين", mLower: "الجزء السفلي (الأرجل)", mBack: "الأكتاف والظهر", gymSoon: "🚧 تمارين الجيم قريباً! الرجاء اختيار التمارين المنزلية.", woGenBtn: "تنظيم الجدول (AI)",
+                btnStartWorkout: "🚀 ابدأ التدريب الآن", btnNextEx: "✔️ إتمام والانتقال للتالي", btnQuitEx: "❌ إنهاء مبكر", txtReps: "عدة", txtSec: "ثانية",
+                targetTxt: "🎯 العضلات المستهدفة:", closeTxt: "حسناً، فهمت",
+                
+                settingsTitle: "الإعدادات والمظهر", langLabel: "اللغة (Language):", themeLabel: "نمط العرض:", themeSys: "تلقائي ⚙️", themeLight: "الوضع الفاتح ☀️", themeDark: "الوضع الداكن 🌙", colorLabel: "اللون الأساسي:", colorBlue: "أزرق محيطي", colorGreen: "أخضر صحي", colorRed: "أحمر نشط", notifLabel: "الإشعارات والتذكير 🔔:", btnNotif: "تفعيل تذكير شرب الماء والتمارين", notifActive: "✅ الإشعارات مفعلة بنجاح!", backBtn: "⬅️ رجوع للرئيسية", backBtnOnly: "رجوع",
+                
+                calcTitle: "تحليل الوجبة", captureBtn: "التقط أو ارفع صورة 📸", advToggle: "⚙️ فتح الخيارات المتقدمة", cookMethod: "طريقة الطبخ:", cookOpt1: "-- اختر --", cookOpt2: "مشوي", cookOpt3: "مسلوق", cookOpt4: "مقلي", proteinType: "البروتين:", protOpt1: "-- اختر --", protOpt2: "دجاج", protOpt3: "لحم", protOpt4: "سمك", extraIngLabel: "مكونات إضافية:", addIngBtn: "➕ أضف مكون", calcNowBtn: "احسب السعرات الآن 🔥",
+                
+                resTitle: "النتيجة التقريبية", kcalText: "سعرة حرارية (Kcal)", aiTipsLabel: "💡 نصائح الذكاء الاصطناعي:", tip1: "📉 للتقليل:", tip2: "🥗 صحياً:", backEditBtn: "⬅️ تعديل", shareBtn: "📲 مشاركة", homeBtn: "🏠 الرئيسية", 
+                
+                histTitle: "سجل الوجبات", clearHistBtn: "🗑️ مسح السجل", emptyHist: "لا توجد وجبات مسجلة حتى الآن.",
+                
+                macrosTitle: "احسب احتياجك 🧮", goalLabel: "الهدف:", goalCut: "تنشيف (خسارة دهون)", goalBulk: "تضخيم (بناء عضل)", calcWhatLabel: "ماذا تريد أن تحسب؟", calcCal: "السعرات الحرارية", calcProt: "البروتين", calcCarb: "الكربوهيدرات", weightPla: "الوزن (كج)", heightPla: "الطول (سم)", agePla: "العمر", genderMale: "ذكر", genderFemale: "أنثى", calcBtnMacros: "احسب النتيجة", errMissingData: "الرجاء تعبئة الوزن والطول والعمر.",
+                
+                profTitle: "الحساب الشخصي", loginDesc: "سجل الدخول لحفظ بياناتك سحابياً", logoutBtn: "تسجيل الخروج",
+                infoTitle: "طريقة الاستخدام", info1: "1. التقط صورة للوجبة للحصول على تقدير آلي للسعرات.", info2: "2. استخدم الخيارات المتقدمة لدقة أعلى.", info3: "3. تم إضافة قسم التمارين المدعوم بالذكاء الاصطناعي مع التدريب التفاعلي.",
+                adSpace: "مساحة إعلانية (Google AdSense Banner)", errNoInput: "⚠️ النتيجة 0: لم تضع صورة أو بيانات متقدمة!", errNoImage: "⚠️ النتيجة 0: لم تضع صورة، والبيانات غير كافية!", errBadImage: "⚠️ النتيجة 0: مشكلة في الصورة المرفقة!", errBadData: "⚠️ النتيجة 0: مشكلة في البيانات المدخلة!"
+            },
+            en: {
+                appTitle: "Smart Fitness App", offlineTitle: "Offline", offlineDesc: "Please connect to the internet to continue.",
+                menuWorkout: "🏋️‍♂️ 1. Workouts (AI)", menu1: "📸 2. Snap & Calculate", menu2: "📋 3. Meal History", menuMacros: "🧮 4. Daily Needs", menu4: "📖 5. How to Use",
+                
+                workoutTitle: "Workouts 🏋️‍♂️", woGoalLabel: "Goal:", woBulk: "Bulk (Muscle)", woCut: "Cut (Fat Loss)", woPlaceLabel: "Location:", woHome: "Home (No Equip)", woGym: "Gym (With Equip)", woMuscleLabel: "Target:", mFull: "Full Body (High Burn)", mChest: "Chest", mArms: "Arms", mLower: "Legs", mBack: "Back", gymSoon: "🚧 Gym coming soon! Please select Home Workouts.", woGenBtn: "Generate Routine (AI)",
+                btnStartWorkout: "🚀 Start Workout Now", btnNextEx: "✔️ Done & Next", btnQuitEx: "❌ Quit Early", txtReps: "reps", txtSec: "sec",
+                targetTxt: "🎯 Target Muscles:", closeTxt: "Got it",
+                
+                settingsTitle: "Settings & Theme", langLabel: "Language:", themeLabel: "Theme:", themeSys: "Auto ⚙️", themeLight: "Light ☀️", themeDark: "Dark 🌙", colorLabel: "Primary Color:", colorBlue: "Ocean Blue", colorGreen: "Healthy Green", colorRed: "Active Red", notifLabel: "Notifications 🔔:", btnNotif: "Enable Water & Workout Reminders", notifActive: "✅ Notifications enabled!", backBtn: "⬅️ Back to Home", backBtnOnly: "Back",
+                
+                calcTitle: "Meal Analysis", captureBtn: "Take/Upload Photo 📸", advToggle: "⚙️ Advanced Options", cookMethod: "Cooking Method:", cookOpt1: "-- Select --", cookOpt2: "Grilled", cookOpt3: "Boiled", cookOpt4: "Fried", proteinType: "Protein:", protOpt1: "-- Select --", protOpt2: "Chicken", protOpt3: "Meat", protOpt4: "Fish", extraIngLabel: "Extra Ingredients:", addIngBtn: "➕ Add Item", calcNowBtn: "Calculate Calories 🔥",
+                
+                resTitle: "Estimated Result", kcalText: "Calories (Kcal)", aiTipsLabel: "💡 AI Tips:", tip1: "📉 Reduce:", tip2: "🥗 Healthier:", backEditBtn: "⬅️ Edit", shareBtn: "📲 Share", homeBtn: "🏠 Home",
+                
+                histTitle: "Meal History", clearHistBtn: "🗑️ Clear History", emptyHist: "No meals recorded yet.",
+                
+                macrosTitle: "Daily Needs 🧮", goalLabel: "Your Goal:", goalCut: "Cut (Lose Fat)", goalBulk: "Bulk (Build Muscle)", calcWhatLabel: "What to calculate?", calcCal: "Daily Calories", calcProt: "Protein Needs", calcCarb: "Carbs Needs", weightPla: "Weight (kg)", heightPla: "Height (cm)", agePla: "Age", genderMale: "Male", genderFemale: "Female", calcBtnMacros: "Calculate", errMissingData: "Please fill in weight, height, and age.",
+                
+                profTitle: "Profile", loginDesc: "Log in to save data to cloud", logoutBtn: "Log Out",
+                infoTitle: "How to Use", info1: "1. Snap a photo of your meal for an automated calorie estimate.", info2: "2. Use advanced options for better accuracy.", info3: "3. Added AI Workout section with interactive training.",
+                adSpace: "Google AdSense Banner Space", errNoInput: "⚠️ Result 0: No image or advanced data!", errNoImage: "⚠️ Result 0: No image, data insufficient!", errBadImage: "⚠️ Result 0: Bad image!", errBadData: "⚠️ Result 0: Bad data!"
+            }
+        };
+
+        // --- 2. قاعدة بيانات التمارين الشاملة مع السعرات والعضلات للوصول لـ 250+ سعرة ---
+        const dbWorkouts = {
+            fullbody: [
+                { ar: {n: "قفز مع فتح القدمين", d: "تمرين لتسخين الجسم وتحريك كافة العضلات."}, en: {n: "Jumping Jacks", d: "Cardio warmup."}, type: "time", base: 60, calPerUnit: 0.2, img: "🏃‍♂️", muscles: {ar: {"القلب (كارديو)": 50, "السمانة": 30, "الأكتاف": 20}, en: {"Cardio": 50, "Calves": 30, "Shoulders": 20}} },
+                { ar: {n: "بيربي كامل", d: "حارق جبار للدهون يدمج بين القوة والكارديو."}, en: {n: "Full Burpees", d: "Total body fat burner."}, type: "reps", base: 15, calPerUnit: 2.5, img: "🔥", muscles: {ar: {"القلب (كارديو)": 40, "الصدر": 30, "الأرجل": 30}, en: {"Cardio": 40, "Chest": 30, "Legs": 30}} },
+                { ar: {n: "تسلق الجبال", d: "يستهدف عضلات البطن ويحرق دهون الخصر."}, en: {n: "Mountain Climbers", d: "Core targeting cardio."}, type: "time", base: 60, calPerUnit: 0.25, img: "🧗‍♂️", muscles: {ar: {"البطن (Core)": 50, "الأكتاف": 30, "كارديو": 20}, en: {"Core": 50, "Shoulders": 30, "Cardio": 20}} }
+            ],
+            chest: [
+                { ar: {n: "تمرين الضغط", d: "التمرين الأساسي لبناء الصدر بدون أوزان."}, en: {n: "Push-ups", d: "Classic chest builder."}, type: "reps", base: 20, calPerUnit: 1.2, img: "💪", muscles: {ar: {"الصدر": 60, "الترايسبس": 25, "الكتف الأمامي": 15}, en: {"Chest": 60, "Triceps": 25, "Front Delt": 15}} },
+                { ar: {n: "ضغط واسع", d: "ركز على عرض الصدر مع فتح اليدين."}, en: {n: "Wide Push-ups", d: "Target outer chest."}, type: "reps", base: 15, calPerUnit: 1.3, img: "🧱", muscles: {ar: {"الصدر الخارجي": 70, "الكتف": 20, "الترايسبس": 10}, en: {"Outer Chest": 70, "Shoulders": 20, "Triceps": 10}} }
+            ],
+            arms: [
+                { ar: {n: "غطس الترايسبس", d: "استند على كرسي لتقوية الذراع الخلفية."}, en: {n: "Bench Dips", d: "Triceps builder using a chair."}, type: "reps", base: 20, calPerUnit: 1.0, img: "🪑", muscles: {ar: {"الترايسبس": 80, "الكتف الأمامي": 10, "الصدر السفلي": 10}, en: {"Triceps": 80, "Front Delt": 10, "Lower Chest": 10}} }
+            ],
+            lower: [
+                { ar: {n: "سكوات بوزن الجسم", d: "يقوي الجزء السفلي بالكامل ويحسن توازن الجسم."}, en: {n: "Bodyweight Squats", d: "Builds lower body strength."}, type: "reps", base: 25, calPerUnit: 1.5, img: "🦵", muscles: {ar: {"الفخذ الأمامي": 50, "المؤخرة": 30, "الفخذ الخلفي": 20}, en: {"Quads": 50, "Glutes": 30, "Hamstrings": 20}} },
+                { ar: {n: "الطعنات", d: "يعزل عضلات الأرجل ويركز على شد الترهلات."}, en: {n: "Lunges", d: "Isolates leg muscles."}, type: "reps", base: 20, calPerUnit: 1.5, img: "🚶‍♂️", muscles: {ar: {"الفخذ الأمامي": 40, "المؤخرة": 40, "السمانة": 20}, en: {"Quads": 40, "Glutes": 40, "Calves": 20}} }
+            ],
+            back: [
+                { ar: {n: "سوبرمان", d: "استلقِ وارفع صدرك وقدميك لتقوية أسفل الظهر."}, en: {n: "Superman", d: "Strengthens lower back."}, type: "time", base: 45, calPerUnit: 0.15, img: "🦸‍♂️", muscles: {ar: {"أسفل الظهر": 70, "المؤخرة": 20, "الأكتاف الخلفية": 10}, en: {"Lower Back": 70, "Glutes": 20, "Rear Delt": 10}} }
+            ]
+        };
+
+        let ingredientCount = 0;
+        let userHistory = JSON.parse(localStorage.getItem('appUserHistory')) || [];
+        let currentWorkoutPlan = [];
+        let currentExerciseIndex = 0;
+        let halfwayAnnounced = false;
+
+        // --- دوال النظام الأساسية ---
+        function checkOnlineStatus() {
+            const overlay = document.getElementById('offlineOverlay');
+            if (navigator.onLine) overlay.style.display = 'none';
+            else overlay.style.display = 'flex';
+        }
+        window.addEventListener('online', checkOnlineStatus);
+        window.addEventListener('offline', checkOnlineStatus);
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        // --- اللغات والثيم ---
+        function applyLanguage(lang) {
+            document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(i18n[lang] && i18n[lang][key]) el.innerText = i18n[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if(i18n[lang] && i18n[lang][key]) el.placeholder = i18n[lang][key];
+            });
+            if(document.getElementById('languageSelector')) document.getElementById('languageSelector').value = lang;
+            document.getElementById('modalContentInner').style.textAlign = lang === 'ar' ? 'right' : 'left';
+            document.getElementById('modalTargetText').innerText = i18n[lang].targetTxt;
+            document.getElementById('modalCloseBtn').innerText = i18n[lang].closeTxt;
+            renderHistory();
+            if(currentWorkoutPlan.length > 0) generateWorkoutList(); // تحديث الجدول باللغة الجديدة
+        }
+
+        function toggleHeaderLanguage() {
+            let currentLang = localStorage.getItem('appLang') || 'ar';
+            let newLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('appLang', newLang);
+            applyLanguage(newLang);
+        }
+
+        function changeLanguage() {
+            const lang = document.getElementById('languageSelector').value;
+            localStorage.setItem('appLang', lang);
+            applyLanguage(lang);
+        }
+
+        function changeTheme() { 
+            const theme = document.getElementById('themeSelector').value;
+            if (theme === 'dark') document.body.classList.add('dark-mode');
+            else document.body.classList.remove('dark-mode');
+        }
+
+        function changeColors() {
+            const primaryColor = document.getElementById('primaryColorSelector').value;
+            document.documentElement.style.setProperty('--primary-color', primaryColor);
+            localStorage.setItem('appPrimaryColor', primaryColor);
+        }
+
+        function loadSavedSettings() {
+            const savedPrimary = localStorage.getItem('appPrimaryColor');
+            const savedLang = localStorage.getItem('appLang') || 'ar'; 
+            if (savedPrimary) {
+                document.documentElement.style.setProperty('--primary-color', savedPrimary);
+                if(document.getElementById('primaryColorSelector')) document.getElementById('primaryColorSelector').value = savedPrimary;
+            }
+            applyLanguage(savedLang);
+        }
+
+        window.onload = function() { checkOnlineStatus(); loadSavedSettings(); changeTheme(); checkSavedGoogleUser(); renderHistory(); };
+
+        // --- المساعد الصوتي (Text to Speech) ---
+        function speakText(textAr, textEn) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const lang = document.documentElement.lang;
+                const msg = new SpeechSynthesisUtterance(lang === 'ar' ? textAr : textEn);
+                msg.lang = lang === 'ar' ? 'ar-SA' : 'en-US';
+                msg.rate = 0.9;
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
+        // --- الإشعارات (Notifications) ---
+        function enableNotifications() {
+            if (!("Notification" in window)) {
+                alert(document.documentElement.lang === 'ar' ? "متصفحك لا يدعم الإشعارات." : "Browser does not support notifications.");
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    document.getElementById('notifStatus').style.display = 'block';
+                    if(document.documentElement.lang === 'ar') {
+                        new Notification("تطبيق اللياقة الذكي 🏋️‍♂️", { body: "تم تفعيل التذكيرات! سنذكرك بشرب الماء والتمارين." });
+                    } else {
+                        new Notification("Smart Fitness App 🏋️‍♂️", { body: "Reminders enabled for water and workouts." });
+                    }
+                } else {
+                    alert(document.documentElement.lang === 'ar' ? "يرجى السماح للإشعارات من إعدادات المتصفح." : "Please allow notifications in browser settings.");
+                }
+            });
+        }
+
+        // --- نظام التمارين الرياضية (Workout Logic) ---
+        function toggleGymOptions() {
+            const place = document.getElementById('wo-place').value;
+            if (place === 'gym') {
+                document.getElementById('home-workout-options').style.display = 'none';
+                document.getElementById('gym-coming-soon').style.display = 'block';
+                document.getElementById('genWorkoutBtn').disabled = true;
+                resetWorkoutResult();
+            } else {
+                document.getElementById('home-workout-options').style.display = 'block';
+                document.getElementById('gym-coming-soon').style.display = 'none';
+                document.getElementById('genWorkoutBtn').disabled = false;
+            }
+        }
+
+        function resetWorkoutResult() { document.getElementById('workout-result-container').style.display = 'none'; }
+
+        function generateWorkoutList() {
+            const lang = document.documentElement.lang;
+            const muscle = document.getElementById('wo-muscle').value;
+            const goal = document.getElementById('wo-goal').value; // Bulk or Cut (adjusts reps/time slightly)
+            let baseExercises = dbWorkouts[muscle] || dbWorkouts['fullbody'];
+            
+            currentWorkoutPlan = [];
+            let totalCalories = 0;
+            let rounds = 0;
+
+            // خوارزمية التكرار للوصول إلى 250 سعرة حرارية فما فوق
+            while (totalCalories < 260 && rounds < 10) {
+                baseExercises.forEach(ex => {
+                    let val = ex.base;
+                    // زيادة الجهد بناءً على الهدف
+                    if(goal === 'cut') { val = ex.type === 'reps' ? val + 5 : val + 15; }
+                    
+                    let exCal = val * ex.calPerUnit;
+                    totalCalories += exCal;
+                    
+                    currentWorkoutPlan.push({
+                        name: ex[lang].n, desc: ex[lang].d, type: ex.type,
+                        value: val, img: ex.img, muscles: ex.muscles[lang]
+                    });
+                });
+                rounds++;
+            }
+
+            const listContainer = document.getElementById('workout-list-html');
+            listContainer.innerHTML = '';
+            
+            const badgeTxt = lang === 'ar' ? `🔥 الحرق المتوقع: ${Math.floor(totalCalories)} سعرة (${rounds} جولات)` : `🔥 Est. Burn: ${Math.floor(totalCalories)} Kcal (${rounds} rounds)`;
+            document.getElementById('totalCaloriesBadge').innerText = badgeTxt;
+
+            const txtReps = i18n[lang].txtReps;
+            const txtSec = i18n[lang].txtSec;
+
+            currentWorkoutPlan.forEach(ex => {
+                let displayValue = ex.type === 'reps' ? `x ${ex.value} ${txtReps}` : `⏱️ ${ex.value} ${txtSec}`;
+                listContainer.innerHTML += `
+                    <div class="workout-list-item">
+                        <div class="workout-img-box">${ex.img}</div>
+                        <div class="workout-info">
+                            <div class="workout-title">${ex.name}</div>
+                            <div class="workout-meta">${displayValue}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('workout-result-container').style.display = 'block';
+        }
+
+        function startInteractiveWorkout() {
+            if(currentWorkoutPlan.length === 0) return;
+            currentExerciseIndex = 0;
+            halfwayAnnounced = false;
+            switchScreen('activeWorkoutScreen');
+            renderCurrentExercise();
+        }
+
+        function renderCurrentExercise() {
+            const lang = document.documentElement.lang;
+            const ex = currentWorkoutPlan[currentExerciseIndex];
+            
+            const progressPercent = (currentExerciseIndex / currentWorkoutPlan.length) * 100;
+            document.getElementById('workoutProgress').style.width = `${progressPercent}%`;
+
+            document.getElementById('activeExImg').innerText = ex.img;
+            document.getElementById('activeExTitle').innerText = ex.name;
+            
+            let valueText = ex.type === 'reps' ? `x ${ex.value} ${i18n[lang].txtReps}` : `⏱️ ${ex.value} ${i18n[lang].txtSec}`;
+            document.getElementById('activeExValue').innerText = valueText;
+
+            // النطق الصوتي
+            let speakAr = `التمرين التالي: ${ex.name}، ${ex.value} ${ex.type === 'reps' ? 'عدة' : 'ثانية'}.`;
+            let speakEn = `Next exercise: ${ex.name}, ${ex.value} ${ex.type === 'reps' ? 'reps' : 'seconds'}.`;
+            speakText(speakAr, speakEn);
+
+            if (!halfwayAnnounced && currentExerciseIndex === Math.floor(currentWorkoutPlan.length / 2) && currentExerciseIndex > 0) {
+                setTimeout(() => { speakText("أحسنت! لقد وصلت لمنتصف التدريب، استمر يا بطل", "Great job! You are halfway there, keep going champion!"); }, 3500);
+                halfwayAnnounced = true;
+            }
+        }
+
+        function completeCurrentExercise() {
+            document.getElementById('soundDone').play().catch(e => {});
+            currentExerciseIndex++;
+            if (currentExerciseIndex >= currentWorkoutPlan.length) {
+                document.getElementById('workoutProgress').style.width = '100%';
+                document.getElementById('soundCheer').play().catch(e => {});
+                speakText("مبروك! لقد أنهيت التدريب وحرقت أكثر من مئتين وخمسين سعرة حرارية، أنت بطل.", "Congratulations! Workout complete. You burned over two hundred and fifty calories. You are a champion!");
+                
+                setTimeout(() => {
+                    alert(document.documentElement.lang === 'ar' ? "🎉 تم إنجاز التدريب بنجاح! بطل!" : "🎉 Workout Complete! Great job!");
+                    switchScreen('workoutsScreen');
+                }, 1500);
+            } else {
+                renderCurrentExercise();
+            }
+        }
+
+        function quitWorkout() {
+            const msg = document.documentElement.lang === 'ar' ? "هل أنت متأكد أنك تريد إنهاء التدريب مبكراً؟" : "Are you sure you want to quit early?";
+            if(confirm(msg)) {
+                window.speechSynthesis.cancel();
+                switchScreen('workoutsScreen');
+            }
+        }
+
+        // تفاصيل التمرين 3D
+        function showExerciseDetails() {
+            const ex = currentWorkoutPlan[currentExerciseIndex];
+            document.getElementById('modalTitle').innerText = ex.name;
+            document.getElementById('modalDesc').innerText = ex.desc;
+            
+            const musclesContainer = document.getElementById('modalMuscles');
+            musclesContainer.innerHTML = '';
+            
+            for (const [muscleName, percentage] of Object.entries(ex.muscles)) {
+                musclesContainer.innerHTML += `
+                    <div class="muscle-row">
+                        <div class="muscle-name"><span>${muscleName}</span> <span>${percentage}%</span></div>
+                        <div class="muscle-bar-bg"><div class="muscle-bar-fill" style="width: 0%;"></div></div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('detailsModal').style.display = 'flex';
+            
+            // Animation for progress bars
+            setTimeout(() => {
+                const fills = document.querySelectorAll('.muscle-bar-fill');
+                let i = 0;
+                for (const percentage of Object.values(ex.muscles)) {
+                    if(fills[i]) fills[i].style.width = percentage + '%';
+                    i++;
+                }
+            }, 100);
+        }
+
+        function closeExerciseDetails() { document.getElementById('detailsModal').style.display = 'none'; }
+
+
+        // --- نظام رفع الصور وتحليل الوجبات (Old Data Fully Retained) ---
+        document.getElementById('mealImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const imgEl = document.getElementById('previewImage');
+            const icon = document.getElementById('imageIcon');
+            try {
+                if (window.blobUrlRef) { URL.revokeObjectURL(window.blobUrlRef); }
+                window.blobUrlRef = URL.createObjectURL(file);
+                icon.style.display = 'none';
+                imgEl.src = window.blobUrlRef;
+                imgEl.style.display = 'block';
+            } catch (err) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    icon.style.display = 'none';
+                    imgEl.src = event.target.result;
+                    imgEl.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function toggleAdvanced() { document.getElementById('advancedOptions').style.display = document.getElementById('advancedToggle').checked ? 'block' : 'none'; }
+
+        function addIngredientRow() {
+            ingredientCount++;
+            const lang = document.documentElement.lang;
+            const rowHtml = `
+                <div class="extra-item-row" id="ingredient_row_${ingredientCount}">
+                    <div class="row-top">
+                        <select style="flex: 1;"><option>${lang==='en'?'Veggies':'خضار'}</option><option>${lang==='en'?'Liquids':'سوائل'}</option><option>${lang==='en'?'Other':'أخرى'}</option></select>
+                        <input type="text" placeholder="${lang==='en'?'Name...':'اسم المكون...'}" style="flex: 2;">
+                    </div>
+                    <div class="row-bottom">
+                        <input type="number" placeholder="${lang==='en'?'Qty (g)':'الوزن (جرام)'}" style="flex: 2;">
+                        <button class="btn-remove" type="button" onclick="document.getElementById('ingredient_row_${ingredientCount}').remove()">❌</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('dynamicIngredientsContainer').insertAdjacentHTML('beforeend', rowHtml);
+        }
+
+        function displayZeroResult(errorKey) {
+            const lang = document.documentElement.lang;
+            document.getElementById('finalCalories').innerText = "0";
+            document.getElementById('caloriesBox').style.borderColor = '#ef4444';
+            document.getElementById('finalCalories').style.color = '#ef4444';
+            document.getElementById('mealNameDisplay').style.display = 'none'; 
+            
+            const errorCard = document.getElementById('errorExplanationCard');
+            errorCard.innerText = i18n[lang][errorKey];
+            errorCard.style.display = 'block';
+            document.getElementById('aiTipsContainer').style.display = 'none';
+            switchScreen('resultScreen');
+        }
+
+        async function startCalculation() {
+            const calcBtn = document.getElementById('calcBtn');
+            const originalText = calcBtn.innerText;
+            const lang = document.documentElement.lang;
+            
+            const fileInput = document.getElementById('mealImage');
+            const file = fileInput.files[0];
+            const cookingMethod = document.getElementById('cookingMethod').value;
+            const proteinType = document.getElementById('proteinType').value;
+            const extraRows = document.querySelectorAll('.extra-item-row');
+            
+            let hasAdvancedDetails = (cookingMethod !== 'none') || (proteinType !== 'none') || (extraRows.length > 0);
+            let hasImage = !!file;
+
+            if (!hasImage && !hasAdvancedDetails) { displayZeroResult('errNoInput'); return; }
+
+            calcBtn.innerText = lang === 'en' ? 'Analyzing... ⏳' : 'جاري التحليل... ⏳'; 
+            calcBtn.disabled = true;
+
+            const formData = new FormData();
+            if (hasImage) formData.append('image', file);
+            formData.append('cookingMethod', cookingMethod);
+            formData.append('proteinType', proteinType);
+            
+            const ingredients = [];
+            extraRows.forEach(row => {
+                const selectType = row.querySelector('select').value;
+                const inputName = row.querySelector('input[type="text"]').value;
+                const inputQty = row.querySelector('input[type="number"]').value;
+                if (inputName || inputQty) ingredients.push({ type: selectType, name: inputName, qty: inputQty });
+            });
+            formData.append('ingredients', JSON.stringify(ingredients));
+
+            try {
+                const response = await fetch('https://my-app-privac2-1.onrender.com/analyze', { method: 'POST', body: formData })
+                if (!response.ok) throw new Error('Server error');
+                
+                const data = await response.json();
+                const caloriesResult = parseInt(data.calories) || 0;
+                const mealNameResult = data.mealName || "";
+
+                if (caloriesResult === 0) {
+                    if (!hasImage) displayZeroResult('errNoImage');
+                    else if (!hasAdvancedDetails) displayZeroResult('errBadImage');
+                    else displayZeroResult('errBadData');
+                } else {
+                    document.getElementById('finalCalories').innerText = caloriesResult;
+                    document.getElementById('caloriesBox').style.borderColor = '#10b981';
+                    document.getElementById('finalCalories').style.color = '#10b981';
+                    
+                    const mealNameDisplay = document.getElementById('mealNameDisplay');
+                    if (mealNameResult.trim() !== "") {
+                        mealNameDisplay.innerText = mealNameResult;
+                        mealNameDisplay.style.display = 'block';
+                    } else { mealNameDisplay.style.display = 'none'; }
+                    
+                    document.getElementById('tipReduce').innerText = data.tipReduce || '';
+                    document.getElementById('tipVeggies').innerText = data.tipVeggies || '';
+                    document.getElementById('errorExplanationCard').style.display = 'none';
+                    document.getElementById('aiTipsContainer').style.display = 'block';
+
+                    saveToHistory(caloriesResult, mealNameResult);
+                    switchScreen('resultScreen');
+                }
+            } catch (error) {
+                if (!hasImage) displayZeroResult('errNoImage'); else displayZeroResult('errBadImage');
+            } finally {
+                calcBtn.innerText = originalText; calcBtn.disabled = false;
+            }
+        }
+
+        function shareResult() {
+            const lang = document.documentElement.lang;
+            const cals = document.getElementById('finalCalories').innerText;
+            const meal = document.getElementById('mealNameDisplay').innerText;
+            const msg = lang === 'en' ? (meal ? `My meal (${meal}) has ${cals} Calories! 🥗🔥` : `My meal has ${cals} Calories! 🥗🔥`) : (meal ? `وجبتي (${meal}) تحتوي على ${cals} سعرة حرارية! 🥗🔥` : `وجبتي تحتوي على ${cals} سعرة حرارية! 🥗🔥`);
+            if (navigator.share) navigator.share({ text: msg }); else alert(msg);
+        }
+
+        // --- نظام سجل الوجبات ---
+        function saveToHistory(calories, mealName) {
+            const dateString = new Date().toLocaleDateString('en-GB') + " " + new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+            userHistory.push({ date: dateString, calories: calories, mealName: mealName || "" });
+            localStorage.setItem('appUserHistory', JSON.stringify(userHistory));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyContainer');
+            if(!container) return;
+            if(userHistory.length === 0) { container.innerHTML = `<p style="text-align:center; color:gray;" data-i18n="emptyHist">${i18n[document.documentElement.lang].emptyHist}</p>`; return; }
+            container.innerHTML = [...userHistory].reverse().map(item => `
+                <div class="history-item">
+                    <span style="font-size:14px; color:gray;">${item.date}</span>
+                    <div style="text-align: ${document.documentElement.dir === 'rtl' ? 'left' : 'right'}; direction: ltr;">
+                        ${item.mealName ? `<strong style="color: var(--primary-color); display: block; font-size: 14px; margin-bottom: 3px; text-align: right; direction: rtl;">🍽️ ${item.mealName}</strong>` : ''}
+                        <strong style="color: #10b981;">${item.calories} Kcal</strong>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            if(confirm(document.documentElement.lang === 'en' ? 'Are you sure?' : 'هل أنت متأكد؟')) {
+                userHistory = []; localStorage.setItem('appUserHistory', JSON.stringify([])); renderHistory();
+            }
+        }
+
+        // --- حاسبة الماكروز (الاحتياج اليومي) ---
+        function calculateMacros() {
+            const lang = document.documentElement.lang;
+            const goal = document.getElementById('goal-select').value;
+            const type = document.getElementById('calc-type-select').value;
+            const weight = parseFloat(document.getElementById('calc-weight').value);
+            const height = parseFloat(document.getElementById('calc-height').value);
+            const age = parseFloat(document.getElementById('calc-age').value);
+            const gender = document.getElementById('calc-gender').value;
+
+            if (!weight || !height || !age) { alert(i18n[lang].errMissingData); return; }
+
+            let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+            bmr = gender === 'male' ? bmr + 5 : bmr - 161;
+            let maintenanceCalories = bmr * 1.55; 
+            let targetCalories = goal === 'cut' ? maintenanceCalories - 500 : maintenanceCalories + 500;
+            let resultText = "";
+
+            if (type === 'calories') {
+                const goalTextEn = goal === 'cut' ? 'to lose fat' : 'to build muscle';
+                const goalTextAr = goal === 'cut' ? 'للتنشيف' : 'للتضخيم';
+                resultText = lang === 'en' ? `Target: ${Math.round(targetCalories)} Kcal/day (${goalTextEn}).` : `الهدف: ${Math.round(targetCalories)} سعرة يومياً (${goalTextAr}).`;
+            } else if (type === 'protein') {
+                let proteinGrams = goal === 'cut' ? weight * 2.2 : weight * 1.8;
+                resultText = lang === 'en' ? `Protein: ${Math.round(proteinGrams)}g daily.` : `البروتين: ${Math.round(proteinGrams)} جرام يومياً.`;
+            } else if (type === 'carbs') {
+                let fatCalories = (weight * 0.8) * 9; 
+                let proteinCalories = (goal === 'cut' ? weight * 2.2 : weight * 1.8) * 4;
+                let carbCalories = targetCalories - fatCalories - proteinCalories;
+                let carbGrams = Math.max(0, carbCalories / 4); 
+                resultText = lang === 'en' ? `Carbs: ${Math.round(carbGrams)}g daily.` : `الكربوهيدرات: ${Math.round(carbGrams)} جرام يومياً.`;
+            }
+            document.getElementById('calc-result').innerText = resultText;
+        }
+
+        // --- الحساب الشخصي لجوجل (Google Login) ---
+        function handleGoogleLogin(response) {
+            const base64Url = response.credential.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            const user = JSON.parse(jsonPayload);
+            localStorage.setItem('googleUser', JSON.stringify(user));
+            showConnectedUser(user.name);
+        }
+
+        function showConnectedUser(name) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('userDataSection').style.display = 'block';
+            document.getElementById('googleUserTxt').innerText = (document.documentElement.lang === 'en') ? `✅ Connected: ${name}` : `✅ متصل: ${name}`;
+        }
+
+        function checkSavedGoogleUser() {
+            const savedUser = localStorage.getItem('googleUser');
+            if(savedUser) showConnectedUser(JSON.parse(savedUser).name);
+        }
+
+        function logoutGoogle() {
+            localStorage.removeItem('googleUser');
+            document.getElementById('userDataSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
