@@ -1,12 +1,10 @@
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdService {
-  static InterstitialAd? _interstitialAd;
-
-  // معرفات الإعلانات الخاصة بك (البينية والبانر)
-  static const String interstitialAdUnitId = 'ca-app-pub-2531938319579823/4955412380';
-  static const String bannerAdUnitId = 'ca-app-pub-2531938319579823/7231709058';
-
+  // معرفات الاختبار الخاصة بجوجل (تظهر دائماً إعلانات تجريبية)
+  static const String interstitialAdUnitId = 'ca-app-pub-3940256099942544/1033173712'; // إعلان بيني تجريبي
+  static const String bannerAdUnitId = 'ca-app-pub-3940256099942544/6300978111';     // إعلان بانر تجريبي
+  
   // --- تحميل الإعلان البيني (صفحة كاملة) ---
   static void loadInterstitialAd() {
     InterstitialAd.load(
