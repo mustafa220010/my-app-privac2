@@ -14,7 +14,9 @@ void main() async {
 
   // تفعيل جهاز الاختبار لضمان ظهور الإعلانات
   MobileAds.instance.updateRequestConfiguration(
-    RequestConfiguration(testDeviceIds: ['b15c47fc-506c-4039-8007-63e4768e6b42']),
+  RequestConfiguration(
+    testDeviceIds: ['B3EEABB8EE11C2BE770B684D95219ECB'], // هذا معرف اختبار عالمي
+    ),
   );
   
   AdService.loadInterstitialAd(); // تحميل الإعلان
