@@ -7,7 +7,19 @@ import 'dart:convert';
 import 'ad_service.dart'; // ملف الإعلانات الخاص بك
 
 void main() async {
+ WidgetsFlutterBinding.ensureInitialized();
+  void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await MobileAds.instance.initialize();
+
+  // تفعيل جهاز الاختبار لضمان ظهور الإعلانات
+  MobileAds.instance.updateRequestConfiguration(
+    RequestConfiguration(testDeviceIds: ['b15c47fc-506c-4039-8007-63e4768e6b42']),
+  );
+  
+  AdService.loadInterstitialAd(); // تحميل الإعلان
+  runApp(const SmartCaloriesApp());
+}
   await MobileAds.instance.initialize();
   
   // تحميل الإعلان مسبقاً
