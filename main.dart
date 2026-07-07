@@ -1,30 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'dart:io';
 import 'dart:convert';
-import 'ad_service.dart'; // ملف الإعلانات الخاص بك
+import 'ad_service.dart'; // استدعاء ملف الإعلانات
 
 void main() async {
- WidgetsFlutterBinding.ensureInitialized();
-  void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await MobileAds.instance.initialize();
-
-  // تفعيل جهاز الاختبار لضمان ظهور الإعلانات
-  MobileAds.instance.updateRequestConfiguration(
-  RequestConfiguration(
-    testDeviceIds: ['B3EEABB8EE11C2BE770B684D95219ECB'], // هذا معرف اختبار عالمي
-    ),
-  );
   
-  AdService.loadInterstitialAd(); // تحميل الإعلان
-  runApp(const SmartCaloriesApp());
-}
-  await MobileAds.instance.initialize();
-  
-  // تحميل الإعلان مسبقاً
+  // تحميل الإعلان البيني (الشاشة الكاملة) مسبقاً
   AdService.loadInterstitialAd();
   
   runApp(const SmartCaloriesApp());
@@ -36,8 +22,8 @@ class SmartCaloriesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'تطبيق السعرات الذكي',
-      debugShowCheckedModeBanner: false, // إخفاء علامة التجربة
+      title: 'السعرات الذكي',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const HomeScreen(),
     );
@@ -55,21 +41,55 @@ class _HomeScreenState extends State<HomeScreen> {
   File? _selectedImage;
   bool _isLoading = false;
   String _resultText = "التقط صورة لمعرفة السعرات 📸";
-
+  
+  // متغيرات البانر
+  BannerAd? _bannerAd;
+  bool _isBannerLoaded = false;
   final ImagePicker _picker = ImagePicker();
 
-  // 1. دالة التقاط الصورة
+  @override
+  void initState() {
+    super.initState();
+    _loadBannerAd(); // استدعاء البانر عند فتح الصفحة
+  }
+
+  // --- دالة تجهيز البانر ---
+  void _loadBannerAd() {
+    _bannerAd = BannerAd(
+      adUnitId: AdService.bannerAdUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isBannerLoaded = true; // 🔴 هذا هو السر لكي يظهر الإعلان فجأة
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+        },
+      ),
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose(); // تنظيف الذاكرة
+    super.dispose();
+  }
+
+  // --- دالة التقاط الصورة ---
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.camera);
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
-        _resultText = "تم اختيار الصورة! اضغط على 'تحليل' 🚀";
+        _resultText = "تم اختيار الصورة! اضغط 'تحليل' 🚀";
       });
     }
   }
 
-  // 2. دالة التحليل (تدمج الإعلان + إرسال الصورة للسيرفر)
+  // --- دالة التحليل (التي تظهر إعلان الشاشة الكاملة) ---
   Future<void> _analyzeMeal() async {
     if (_selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -78,67 +98,50 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-      _resultText = "جاري التحليل... ⏳";
-    });
-
-    // إظهار الإعلان أولاً، ثم تنفيذ كود السيرفر بعد إغلاقه
+    // 🔴 إظهار إعلان الصفحة الكاملة أولاً، ثم إرسال الصورة للسيرفر
     AdService.showInterstitialAd(() async {
-      await _sendToServer();
+      setState(() {
+        _isLoading = true;
+        _resultText = "جاري التحليل... ⏳";
+      });
+      await _sendToServer(); // استدعاء السيرفر بعد إغلاق الإعلان
     });
   }
 
-  // 3. دالة إرسال الصورة لسيرفرك (الذي برمجته بالبايثون)
+  // --- دالة إرسال البيانات للسيرفر ---
   Future<void> _sendToServer() async {
     try {
-      // رابط سيرفرك المرفوع على Render
       var request = http.MultipartRequest(
           'POST', Uri.parse('https://my-app-privac2-1.onrender.com/analyze'));
       
-      request.files.add(
-          await http.MultipartFile.fromPath('image', _selectedImage!.path));
-
+      request.files.add(await http.MultipartFile.fromPath('image', _selectedImage!.path));
       var response = await request.send();
       
       if (response.statusCode == 200) {
         var responseData = await response.stream.bytesToString();
         var json = jsonDecode(responseData);
         setState(() {
-          // عرض النتيجة التي يرسلها السيرفر
           _resultText = "النتيجة: ${json['calories']} سعرة حرارية 🔥";
         });
       } else {
-        setState(() {
-          _resultText = "حدث خطأ في السيرفر ❌";
-        });
+        setState(() { _resultText = "حدث خطأ في السيرفر ❌"; });
       }
     } catch (e) {
-      setState(() {
-        _resultText = "تأكد من اتصالك بالإنترنت 🌐";
-      });
+      setState(() { _resultText = "تأكد من اتصالك بالإنترنت 🌐"; });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() { _isLoading = false; });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // إعداد كود البانر الإعلاني
-   // تأكد من أن _bannerAd تم تعريفه كـ BannerAd?
-// وتأكد من أنك قمت بعمل load() له في الـ initState
-
-if (_bannerAd != null)
-  Container(
-    width: _bannerAd!.size.width.toDouble(),
-    height: 50.0,
-    alignment: Alignment.center,
-    // التصحيح هنا: نستخدم AdWidget ونمرر له الإعلان عبر خاصية ad
-    child: AdWidget(ad: _bannerAd!), 
-  ),
-            // عرض الصورة
+    return Scaffold(
+      appBar: AppBar(title: const Text('السعرات الذكي 🍏')),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
             Container(
               height: 250,
               width: double.infinity,
@@ -154,16 +157,10 @@ if (_bannerAd != null)
                   : const Center(child: Text("لا توجد صورة", style: TextStyle(fontSize: 18))),
             ),
             const SizedBox(height: 20),
-            
-            // النص أو النتيجة
             Text(_resultText, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
             const SizedBox(height: 20),
-            
-            // مؤشر التحميل
             if (_isLoading) const CircularProgressIndicator(),
             const SizedBox(height: 20),
-            
-            // أزرار التحكم
             Row(
               children: [
                 Expanded(
@@ -185,27 +182,14 @@ if (_bannerAd != null)
           ],
         ),
       ),
-      // إعلان البانر في أسفل الشاشة
-      bottomNavigationBar: SizedBox(
-        height: 50,
-        child: AdWidget(ad: bannerAd),
-       Scaffold(
-  appBar: AppBar(title: const Text('تطبيق السعرات الذكي')),
-  
-  // هنا محتوى الشاشة (الصور والأزرار)
-  body: Column(
-     // ... محتواك
-  ),
-
-  // --- هذا هو مكان البانر الصحيح ---
-  bottomNavigationBar: _bannerAd == null
-      ? const SizedBox(height: 0) // إذا لم يتحمل الإعلان لا يظهر شيء
-      : SizedBox(
-          height: 50, // ارتفاع البانر القياسي
-          child: AdWidget(ad: _bannerAd!),
-        ),
-)
-      ),
+      // 🔴 مكان ظهور البانر في أسفل الشاشة
+      bottomNavigationBar: _isBannerLoaded && _bannerAd != null
+          ? SizedBox(
+              height: _bannerAd!.size.height.toDouble(),
+              width: _bannerAd!.size.width.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            )
+          : const SizedBox(height: 0), // لا نعرض شيئاً إذا لم يتحمل البانر بعد
     );
   }
 }
