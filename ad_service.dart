@@ -11,8 +11,11 @@ class AdService {
       adUnitId: interstitialAdUnitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) => _interstitialAd = ad,
-        onAdFailedToLoad: (error) => _interstitialAd = null,
+       listener: BannerAdListener(
+      onAdLoaded: (ad) {
+    setState(() {}); // "السر" هنا: تحديث الشاشة ليظهر الإعلان
+  },
+),
       ),
     );
   }
