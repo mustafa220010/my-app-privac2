@@ -127,15 +127,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     // إعداد كود البانر الإعلاني
-    BannerAd? bannerAd = AdService.createBannerAd()..load();
+   // تأكد من أن _bannerAd تم تعريفه كـ BannerAd?
+// وتأكد من أنك قمت بعمل load() له في الـ initState
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('السعرات الذكي 🍏')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+if (_bannerAd != null)
+  Container(
+    width: _bannerAd!.size.width.toDouble(),
+    height: 50.0,
+    alignment: Alignment.center,
+    // التصحيح هنا: نستخدم AdWidget ونمرر له الإعلان عبر خاصية ad
+    child: AdWidget(ad: _bannerAd!), 
+  ),
             // عرض الصورة
             Container(
               height: 250,
