@@ -189,6 +189,22 @@ if (_bannerAd != null)
       bottomNavigationBar: SizedBox(
         height: 50,
         child: AdWidget(ad: bannerAd),
+       Scaffold(
+  appBar: AppBar(title: const Text('تطبيق السعرات الذكي')),
+  
+  // هنا محتوى الشاشة (الصور والأزرار)
+  body: Column(
+     // ... محتواك
+  ),
+
+  // --- هذا هو مكان البانر الصحيح ---
+  bottomNavigationBar: _bannerAd == null
+      ? const SizedBox(height: 0) // إذا لم يتحمل الإعلان لا يظهر شيء
+      : SizedBox(
+          height: 50, // ارتفاع البانر القياسي
+          child: AdWidget(ad: _bannerAd!),
+        ),
+)
       ),
     );
   }
