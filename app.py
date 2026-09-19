@@ -73,7 +73,7 @@ def analyze_meal():
         models_to_try = [
             "meta-llama/llama-4-scout-17b-16e-instruct",
             "meta-llama/llama-4-maverick-17b-128e-instruct",
-        ]
+        ] 
         
         response = None
         successful_model = None
@@ -88,8 +88,9 @@ def analyze_meal():
                 )
                 successful_model = model_name
                 break
-            except Exception:
-                continue
+            except Exception as e:
+        print(f"Groq model {model_name} failed: {e}", flush=True)
+            continue
 
         if not response:
             return jsonify({"error_type": "groq_api_error", "error": "فشل الاتصال بـ Groq عبر جميع النماذج."}), 502
