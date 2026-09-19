@@ -111,7 +111,8 @@ def analyze_meal():
         ]
 
         models_to_try = [
-    "اسم-نموذج-Vision-الموجود-في-Groq",
+    "openai/gpt-oss-120b",
+]
         ]
 
         response = None
