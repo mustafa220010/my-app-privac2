@@ -111,8 +111,7 @@ def analyze_meal():
         ]
 
         models_to_try = [
-            "meta-llama/llama-4-scout-17b-16e-instruct",
-            "meta-llama/llama-4-maverick-17b-128e-instruct",
+    "اسم-نموذج-Vision-الموجود-في-Groq",
         ]
 
         response = None
