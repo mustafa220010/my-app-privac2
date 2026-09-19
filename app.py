@@ -89,7 +89,7 @@ def analyze_meal():
 }}
 """
 
-        messages = [
+        messages = 
             {
                 "role": "user",
                 "content": [
