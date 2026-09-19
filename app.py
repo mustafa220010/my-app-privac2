@@ -2,75 +2,101 @@ import base64
 import io
 import json
 import os
+import urllib.error
+import urllib.request
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from groq import Groq
 from PIL import Image, UnidentifiedImageError
 
 
 app = Flask(__name__)
 CORS(app)
 
-groq_api_key = os.environ.get("GROQ_API_KEY")
-client = Groq(api_key=groq_api_key) if groq_api_key else None
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GEMINI_MODEL = "gemini-2.5-flash"
 
 
-@app.route("/analyze", methods=["POST"])
+@app.get("/")
+def home():
+    return jsonify({
+        "status": "ok",
+        "message": "Smart Calories server is running",
+    })
+
+
+@app.post("/analyze")
 def analyze_meal():
+    if not GEMINI_API_KEY:
+        return jsonify({
+            "error_type": "server_configuration",
+            "error": "مفتاح Gemini مفقود في إعدادات Render.",
+        }), 500
+
+    image_file = request.files.get("image")
+
+    if not image_file or not image_file.filename:
+        return jsonify({
+            "error_type": "image_missing",
+            "error": "لم يتم إرفاق صورة.",
+        }), 400
+
+    cooking_method = request.form.get(
+        "cooking_method",
+        request.form.get("cookingMethod", "غير محدد"),
+    )
+
+    protein_type = request.form.get(
+        "proteinType",
+        request.form.get("protein_type", "غير محدد"),
+    )
+
+    ingredients = request.form.get(
+        "ingredients",
+        request.form.get("extra_ingredients", "لا يوجد"),
+    )
+
     try:
-        if not client:
-            return jsonify({
-                "error_type": "server_configuration",
-                "error": "مفتاح الذكاء الاصطناعي مفقود في إعدادات Render.",
-            }), 500
+        original_bytes = image_file.read()
 
-        cooking_method = request.form.get(
-            "cooking_method",
-            request.form.get("cookingMethod", "غير محدد"),
-        )
-        protein_type = request.form.get("proteinType", "غير محدد")
-        ingredients = request.form.get("ingredients", "[]")
-        image_file = request.files.get("image")
+        image = Image.open(io.BytesIO(original_bytes))
 
-        if not image_file or not image_file.filename:
-            return jsonify({
-                "error_type": "image_missing",
-                "error": "لم يتم إرفاق صورة.",
-            }), 400
+        if image.mode != "RGB":
+            image = image.convert("RGB")
 
-        try:
-            image_bytes = image_file.read()
-            image = Image.open(io.BytesIO(image_bytes))
+        image_buffer = io.BytesIO()
+        image.save(image_buffer, format="JPEG", quality=85)
 
-            if image.mode != "RGB":
-                image = image.convert("RGB")
+        image_bytes = image_buffer.getvalue()
+        image_base64 = base64.b64encode(image_bytes).decode("utf-8")
 
-            buffer = io.BytesIO()
-            image.save(buffer, format="JPEG", quality=85)
-            base64_image = base64.b64encode(
-                buffer.getvalue()
-            ).decode("utf-8")
+    except UnidentifiedImageError:
+        return jsonify({
+            "error_type": "image_invalid",
+            "error": "الملف المرفق ليس صورة صالحة.",
+        }), 400
 
-        except UnidentifiedImageError:
-            return jsonify({
-                "error_type": "image_invalid",
-                "error": "الملف المرفق ليس صورة صالحة.",
-            }), 400
-        except Exception as error:
-            return jsonify({
-                "error_type": "image_processing",
-                "error": str(error),
-            }), 400
+    except Exception as error:
+        return jsonify({
+            "error_type": "image_processing",
+            "error": str(error),
+        }), 400
 
-        prompt = f"""
-أنت خبير تغذية. حلل صورة الوجبة بدقة.
+    prompt = f"""
+أنت خبير تغذية متخصص في تحليل صور الوجبات.
 
-طريقة الطبخ: {cooking_method}
-نوع البروتين: {protein_type}
-المكونات الإضافية: {ingredients}
+حلل صورة الوجبة وقدر السعرات الحرارية والمعلومات الغذائية.
 
-أرجع JSON فقط، بدون أي نص إضافي، بهذا الشكل:
+طريقة الطبخ:
+{cooking_method}
+
+نوع البروتين:
+{protein_type}
+
+المكونات الإضافية:
+{ingredients}
+
+أرجع JSON فقط بدون أي شرح خارجي، بهذا الشكل:
 {{
   "status": "success",
   "calories": 0,
@@ -79,7 +105,10 @@ def analyze_meal():
   "tipVeggies": "نصيحة لإضافة الخضار"
 }}
 
-إذا كانت الصورة غير واضحة أو لا تحتوي على طعام:
+القواعد:
+- calories يجب أن يكون رقمًا فقط.
+- mealName يجب أن يكون اسم الوجبة بالعربية.
+- إذا كانت الصورة غير واضحة أو لا تحتوي على طعام، استخدم:
 {{
   "status": "unclear",
   "calories": 0,
@@ -89,95 +118,135 @@ def analyze_meal():
 }}
 """
 
-        messages = 
+    request_body = {
+        "contents": [
             {
-                "role": "user",
-                "content": [
+                "parts": [
                     {
-                        "type": "text",
                         "text": prompt,
                     },
                     {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": (
-                                f"data:image/jpeg;base64,"
-                                f"{base64_image}"
-                            ),
+                        "inline_data": {
+                            "mime_type": "image/jpeg",
+                            "data": image_base64,
                         },
                     },
                 ],
             },
-        ]
+        ],
+        "generationConfig": {
+            "temperature": 0.1,
+            "responseMimeType": "application/json",
+        },
+    }
 
-        models_to_try = [
-    "openai/gpt-oss-120b",
-]
-        ]
+    api_url = (
+        "https://generativelanguage.googleapis.com/"
+        f"v1beta/models/{GEMINI_MODEL}:generateContent"
+        f"?key={GEMINI_API_KEY}"
+    )
 
-        response = None
-        successful_model = None
-        last_error = None
+    try:
+        http_request = urllib.request.Request(
+            api_url,
+            data=json.dumps(request_body).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
 
-        for model_name in models_to_try:
-            try:
-                response = client.chat.completions.create(
-                    model=model_name,
-                    messages=messages,
-                    response_format={"type": "json_object"},
-                    temperature=0.1,
-                    max_tokens=600,
-                )
-                successful_model = model_name
-                break
+        with urllib.request.urlopen(http_request, timeout=90) as response:
+            raw_response = response.read().decode("utf-8")
 
-            except Exception as error:
-                last_error = error
-                print(
-                    f"Groq model {model_name} failed: {error}",
-                    flush=True,
-                )
+        gemini_response = json.loads(raw_response)
 
-        if response is None:
-            return jsonify({
-                "error_type": "groq_api_error",
-                "error": "فشل الاتصال بـ Groq.",
-                "details": str(last_error),
-            }), 502
+    except urllib.error.HTTPError as error:
+        error_body = error.read().decode("utf-8", errors="replace")
 
-        content = response.choices[0].message.content
-
-        if not content:
-            return jsonify({
-                "error_type": "empty_ai_response",
-                "error": "عاد رد فارغ من الذكاء الاصطناعي.",
-            }), 502
-
-        try:
-            result = json.loads(content)
-        except json.JSONDecodeError:
-            return jsonify({
-                "error_type": "invalid_ai_response",
-                "error": "رد الذكاء الاصطناعي ليس بصيغة JSON صحيحة.",
-                "details": content,
-            }), 502
-
-        if result.get("status") == "unclear":
-            return jsonify({
-                "error_type": "ai_unclear_image",
-                "error": "الصورة غير واضحة أو لا تحتوي على وجبة.",
-            }), 400
-
-        result["processed_by"] = successful_model
-        return jsonify(result), 200
-
-    except Exception as error:
-        print(f"Unexpected server error: {error}", flush=True)
+        print(
+            f"Gemini HTTP error {error.code}: {error_body}",
+            flush=True,
+        )
 
         return jsonify({
-            "error_type": "internal_server_error",
+            "error_type": "gemini_api_error",
+            "error": "فشل الاتصال بخدمة Gemini.",
+            "details": error_body,
+        }), 502
+
+    except Exception as error:
+        print(
+            f"Gemini connection error: {error}",
+            flush=True,
+        )
+
+        return jsonify({
+            "error_type": "gemini_connection_error",
+            "error": "تعذر الاتصال بخدمة Gemini.",
+            "details": str(error),
+        }), 502
+
+    try:
+        candidates = gemini_response.get("candidates", [])
+
+        if not candidates:
+            return jsonify({
+                "error_type": "empty_ai_response",
+                "error": "لم ترجع Gemini أي نتيجة.",
+                "details": gemini_response,
+            }), 502
+
+        parts = candidates[0].get("content", {}).get("parts", [])
+
+        response_text = ""
+
+        for part in parts:
+            if "text" in part:
+                response_text += part["text"]
+
+        if not response_text.strip():
+            return jsonify({
+                "error_type": "empty_ai_response",
+                "error": "رد Gemini فارغ.",
+            }), 502
+
+        response_text = response_text.strip()
+
+        if response_text.startswith("```"):
+            response_text = response_text.replace("```json", "")
+            response_text = response_text.replace("```", "")
+            response_text = response_text.strip()
+
+        result = json.loads(response_text)
+
+    except json.JSONDecodeError:
+        return jsonify({
+            "error_type": "invalid_ai_response",
+            "error": "رد Gemini ليس بصيغة JSON صحيحة.",
+            "details": response_text,
+        }), 502
+
+    except Exception as error:
+        return jsonify({
+            "error_type": "response_processing_error",
             "error": str(error),
-        }), 500
+        }), 502
+
+    if result.get("status") == "unclear":
+        return jsonify({
+            "error_type": "ai_unclear_image",
+            "error": "الصورة غير واضحة أو لا تحتوي على وجبة.",
+        }), 400
+
+    return jsonify({
+        "status": "success",
+        "calories": result.get("calories", 0),
+        "mealName": result.get("mealName", ""),
+        "tipReduce": result.get("tipReduce", ""),
+        "tipVeggies": result.get("tipVeggies", ""),
+        "processed_by": GEMINI_MODEL,
+    }), 200
 
 
 if __name__ == "__main__":
