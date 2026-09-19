@@ -70,31 +70,35 @@ def analyze_meal():
             {"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}]}
         ]
 
-        models_to_try = [
+               models_to_try = [
             "meta-llama/llama-4-scout-17b-16e-instruct",
             "meta-llama/llama-4-maverick-17b-128e-instruct",
-        ] 
-        
+        ]
+
         response = None
         successful_model = None
-        
+
         for model_name in models_to_try:
             try:
                 response = client.chat.completions.create(
                     model=model_name,
                     messages=messages,
                     response_format={"type": "json_object"},
-                    temperature=0.1
+                    temperature=0.1,
                 )
                 successful_model = model_name
                 break
             except Exception as e:
-        print(f"Groq model {model_name} failed: {e}", flush=True)
-            continue
+                print(
+                    f"Groq model {model_name} failed: {e}",
+                    flush=True,
+                )
 
         if not response:
-            return jsonify({"error_type": "groq_api_error", "error": "فشل الاتصال بـ Groq عبر جميع النماذج."}), 502
-
+            return jsonify({
+                "error_type": "groq_api_error",
+                "error": "فشل الاتصال بـ Groq عبر جميع النماذج.",
+            }), 502
         final_result = json.loads(response.choices[0].message.content)
 
         if final_result.get("status") == "unclear":
